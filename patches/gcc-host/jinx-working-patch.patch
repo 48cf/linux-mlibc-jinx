@@ -139,18 +139,9 @@ index a7248ac..e50ae14 100644
  /* Whether we have Bionic libc runtime */
  #undef TARGET_HAS_BIONIC
 diff --git gcc-host-clean/gcc/config.gcc gcc-host-workdir/gcc/config.gcc
-index 95c91ee..d4c5a5f 100644
+index 95c91ee..df68126 100644
 --- gcc-host-clean/gcc/config.gcc
 +++ gcc-host-workdir/gcc/config.gcc
-@@ -187,7 +187,7 @@
- #			the --with-sysroot configure option or the
- #			--sysroot command line option is used this
- #			will be relative to the sysroot.
--# target_type_format_char 
-+# target_type_format_char
- # 			The default character to be used for formatting
- #			the attribute in a
- #			.type symbol_name, ${t_t_f_c}<property>
 @@ -693,7 +693,7 @@ case ${target} in
  esac
  
@@ -197,18 +188,9 @@ index ebbca37..ea97ba4 100644
  LIBINTL = @LIBINTL@
  PACKAGE = @PACKAGE@
 diff --git gcc-host-clean/libgcc/config.host gcc-host-workdir/libgcc/config.host
-index e75a7af..ef85694 100644
+index e75a7af..4d61f58 100644
 --- gcc-host-clean/libgcc/config.host
 +++ gcc-host-workdir/libgcc/config.host
-@@ -103,7 +103,7 @@ arm*-*-*)
- 	;;
- avr-*-*)
- 	cpu_type=avr
--	;;    
-+	;;
- bfin*-*)
- 	cpu_type=bfin
- 	;;
 @@ -304,6 +304,11 @@ case ${host} in
    tmake_file="$tmake_file t-crtstuff-pic t-libgcc-pic t-eh-dw2-dip t-slibgcc t-slibgcc-fuchsia"
    extra_parts="crtbegin.o crtend.o"
@@ -233,7 +215,7 @@ index e75a7af..ef85694 100644
  	tmake_file="${tmake_file} i386/t-dragonfly i386/t-crtstuff"
  	md_unwind_header=i386/dragonfly-unwind.h
 diff --git gcc-host-clean/libgcc/configure.ac gcc-host-workdir/libgcc/configure.ac
-index 4e8c036..a0bc7de 100644
+index 4e8c036..d298fe5 100644
 --- gcc-host-clean/libgcc/configure.ac
 +++ gcc-host-workdir/libgcc/configure.ac
 @@ -46,7 +46,7 @@ else
@@ -245,17 +227,8 @@ index 4e8c036..a0bc7de 100644
  AC_CONFIG_HEADER(auto-target.h:config.in)
  
  AC_ARG_ENABLE(shared,
-@@ -307,7 +307,7 @@ AC_LIB_PROG_LD_GNU
- 
- AC_MSG_CHECKING([for thread model used by GCC])
- target_thread_file=`$CC -v 2>&1 | sed -n 's/^Thread model: //p'`
--AC_MSG_RESULT([$target_thread_file]) 
-+AC_MSG_RESULT([$target_thread_file])
- 
- # Check for assembler CFI support.
- AC_CACHE_CHECK([whether assembler supports CFI directives], [libgcc_cv_cfi],
 diff --git gcc-host-clean/libiberty/configure.ac gcc-host-workdir/libiberty/configure.ac
-index 0888e63..3c59ac7 100644
+index 0888e63..10161a1 100644
 --- gcc-host-clean/libiberty/configure.ac
 +++ gcc-host-workdir/libiberty/configure.ac
 @@ -37,7 +37,7 @@ else
@@ -267,64 +240,10 @@ index 0888e63..3c59ac7 100644
  
  dnl Very limited version of automake's enable-maintainer-mode
  
-@@ -159,10 +159,10 @@ case x"$enable_install_libiberty" in
-   xyes|x)
-     target_header_dir=libiberty
-     ;;
--  xno)   
-+  xno)
-     target_header_dir=
-     ;;
--  *) 
-+  *)
-     # This could be sanity-checked in various ways...
-     target_header_dir="${enable_install_libiberty}"
-     ;;
-@@ -659,19 +659,19 @@ if test -z "${setobjs}"; then
-     ;;
- 
-   *-*-uwin*)
--    # Under some versions of uwin, vfork is notoriously buggy and the test 
-+    # Under some versions of uwin, vfork is notoriously buggy and the test
-     # can hang configure; on other versions, vfork exists just as a stub.
-     # FIXME: This should be removed once vfork in uwin's runtime is fixed.
-     ac_cv_func_vfork_works=no
-     # Under uwin 2.0+, sys_nerr and sys_errlist exist, but they are
--    # macros (actually, these are imported from a DLL, but the end effect 
-+    # macros (actually, these are imported from a DLL, but the end effect
-     # is the same), so the test below won't find them.
-     libiberty_cv_var_sys_nerr=yes
-     libiberty_cv_var_sys_errlist=yes
-     ;;
- 
-   *-*-*vms*)
--    # Under VMS, vfork works very different than on Unix. The standard test 
-+    # Under VMS, vfork works very different than on Unix. The standard test
-     # won't work, and it isn't easily adaptable. It makes more sense to
-     # just force it.
-     ac_cv_func_vfork_works=yes
 diff --git gcc-host-clean/libstdc++-v3/configure.host gcc-host-workdir/libstdc++-v3/configure.host
-index 7bc4307..ce3cd5d 100644
+index 7bc4307..8ebd90e 100644
 --- gcc-host-clean/libstdc++-v3/configure.host
 +++ gcc-host-workdir/libstdc++-v3/configure.host
-@@ -136,7 +136,7 @@ esac
- 
- # Now look for the file(s) usually tied to a CPU model, and make
- # default choices for those if they haven't been explicitly set
--# already.  
-+# already.
- cpu_include_dir=cpu/${try_cpu}
- 
- 
-@@ -152,7 +152,7 @@ case "${host_cpu}" in
- esac
- 
- 
--# Set specific CPU overrides for atomic_word_dir and atomic_flags. 
-+# Set specific CPU overrides for atomic_word_dir and atomic_flags.
- # Most can just use generic.
- # THIS TABLE IS SORTED.  KEEP IT THAT WAY.
- case "${host_cpu}" in
 @@ -255,7 +255,7 @@ case "${host_os}" in
    freebsd*)
      os_include_dir="os/bsd/freebsd"
@@ -335,18 +254,9 @@ index 7bc4307..ce3cd5d 100644
      ;;
    gnu* | linux* | kfreebsd*-gnu | uclinux*)
 diff --git gcc-host-clean/libstdc++-v3/crossconfig.m4 gcc-host-workdir/libstdc++-v3/crossconfig.m4
-index b3269cb..6dae703 100644
+index b3269cb..f2d4d13 100644
 --- gcc-host-clean/libstdc++-v3/crossconfig.m4
 +++ gcc-host-workdir/libstdc++-v3/crossconfig.m4
-@@ -90,7 +90,7 @@ case "${host}" in
- 
-   *-freebsd*)
-     SECTION_FLAGS='-ffunction-sections -fdata-sections'
--    AC_SUBST(SECTION_FLAGS) 
-+    AC_SUBST(SECTION_FLAGS)
-     GLIBCXX_CHECK_LINKER_FEATURES
-     AC_DEFINE(HAVE_SETENV)
-     AC_DEFINE(HAVE_FINITEF)
 @@ -136,6 +136,18 @@ case "${host}" in
      AC_CHECK_FUNCS(uselocale)
      ;;
@@ -366,21 +276,3 @@ index b3269cb..6dae703 100644
    *-fuchsia*)
      SECTION_FLAGS='-ffunction-sections -fdata-sections'
      AC_SUBST(SECTION_FLAGS)
-@@ -200,7 +212,7 @@ case "${host}" in
-     ;;
-   *-netbsd* | *-openbsd*)
-     SECTION_FLAGS='-ffunction-sections -fdata-sections'
--    AC_SUBST(SECTION_FLAGS) 
-+    AC_SUBST(SECTION_FLAGS)
-     GLIBCXX_CHECK_LINKER_FEATURES
-     AC_DEFINE(HAVE_FINITEF)
-     AC_DEFINE(HAVE_FINITE)
-@@ -221,7 +233,7 @@ case "${host}" in
-     ;;
-   *-qnx6.1* | *-qnx6.2*)
-     SECTION_FLAGS='-ffunction-sections -fdata-sections'
--    AC_SUBST(SECTION_FLAGS) 
-+    AC_SUBST(SECTION_FLAGS)
-     GLIBCXX_CHECK_LINKER_FEATURES
-     AC_DEFINE(HAVE_COSF)
-     AC_DEFINE(HAVE_COSL)
