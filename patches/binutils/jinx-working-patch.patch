@@ -53,7 +53,7 @@ index adac1dd..d3b24a2 100644
    if (CALL_REAL (timer_create)(CLOCK_THREAD_CPUTIME_ID, &sigev, ptimerid) == -1)
      {
 diff --git binutils-clean/gprofng/libcollector/mmaptrace.c binutils-workdir/gprofng/libcollector/mmaptrace.c
-index 486c87e..9be94e4 100644
+index 486c87e..83ce05c 100644
 --- binutils-clean/gprofng/libcollector/mmaptrace.c
 +++ binutils-workdir/gprofng/libcollector/mmaptrace.c
 @@ -32,6 +32,7 @@
@@ -64,96 +64,14 @@ index 486c87e..9be94e4 100644
  #include <stdint.h>
  
  #include "gp-defs.h"
-@@ -470,90 +471,6 @@ dlopen_searchpath (void*(real_dlopen) (const char *, int),
+@@ -470,7 +471,7 @@ dlopen_searchpath (void*(real_dlopen) (const char *, int),
        TprintfT (0, "ERROR: dlopen(%s,NOLOAD): %s\n", dl_info.dli_fname, dlerror ());
        return NULL;
      }
 -#if !defined(__MUSL_LIBC)
--  Dl_serinfo _info, *info = &_info;
--  Dl_serpath *path;
--
--  /* determine search path count and required buffer size */
--  dlinfo (caller_hndl, RTLD_DI_SERINFOSIZE, (void *) info);
--
--  /* allocate new buffer and initialize */
--  /*
--      CR# 7191331
--      There is a bug in Linux that causes the first call
--      to dlinfo() to return a small value for the dls_size.
--
--      The first call to dlinfo() determines the search path
--      count and the required buffer size. The second call to
--      dlinfo() tries to obtain the search path information.
--
--      However, the size of the buffer that is returned by
--      the first call to the dlinfo() is incorrect (too small).
--      The second call to dlinfo() uses the incorrect size to
--      allocate memory on the stack and internally uses the memcpy()
--      function to copy the search paths to the allocated memory space.
--      The length of the search path is much larger than the buffer
--      that is allocated on the stack. The memcpy() overwrites some
--      of the information that are saved on the stack, specifically,
--      it overwrites the "basename" parameter.
--
--      collect crashes right after the second call to dlinfo().
--
--      The search paths are used to locate the shared libraries.
--      dlinfo() creates the search paths based on the paths
--      that are assigned to LD_LIBRARY_PATH environment variable
--      and the standard library paths. The standard library paths
--      consists of the /lib and the /usr/lib paths. The
--      standard library paths are always included to the search
--      paths by dlinfo() even if the LD_LIBRARY_PATH environment
--      variable is not defined. Therefore, at the very least the
--      dls_cnt is assigned to 2 (/lib and /usr/lib) and dlinfo()
--      will never assign dls_cnt to zero. The dls_cnt is the count
--      of the potential paths for searching the shared libraries.
--
--      So we need to increase the buffer size before the second
--      call to dlinfo(). There are number of ways to increase
--      the buffer size. However, none of them can calculate the
--      buffer size precisely. Some users on the web have suggested
--      to multiply the MAXPATHLEN by dls_cnt for the buffer size.
--      The MAXPATHLEN is assigned to 1024 bytes. In my opinion
--      this is too much. So I have decided to multiply dls_size
--      by dls_cnt for the buffer size since the dls_size is much
--      smaller than 1024 bytes.
--
--      I have already confirmed with our user that the workaround
--      is working with his real application. Additionally,
--      the dlopen_searchpath() function is called only by the
--      libcollector init() function when the experiment is started.
--      Therefore, allocating some extra bytes on the stack which
--      is local to this routine is harmless.
--   */
--
--  info = alloca (_info.dls_size * _info.dls_cnt);
--  info->dls_size = _info.dls_size;
--  info->dls_cnt = _info.dls_cnt;
--
--  /* obtain search path information */
--  dlinfo (caller_hndl, RTLD_DI_SERINFO, (void *) info);
--  path = &info->dls_serpath[0];
--
--  char pathname[MAXPATHLEN];
--  for (unsigned int cnt = 1; cnt <= info->dls_cnt; cnt++, path++)
--    {
--      __collector_strlcpy (pathname, path->dls_name, sizeof (pathname));
--      __collector_strlcat (pathname, "/", sizeof (pathname));
--      __collector_strlcat (pathname, basename, sizeof (pathname));
--      void* ret = NULL;
--#if (ARCH(Intel) && WSIZE(32)) || ARCH(SPARC)
--      ret = (real_dlopen) (pathname, mode);
--#else
--      ret = CALL_REAL (dlopen)(pathname, mode);
--#endif
--      TprintfT (DBG_LT2, "try %d/%d: %s = %p\n", cnt, info->dls_cnt, pathname, ret);
--      if (ret)
--	return ret; // success!
--    }
--#endif
-   return NULL;
- }
++#if !defined(__MUSL_LIBC) && !defined(__mlibc_linux__)
+   Dl_serinfo _info, *info = &_info;
+   Dl_serpath *path;
  
 diff --git binutils-clean/libiberty/configure.ac binutils-workdir/libiberty/configure.ac
 index c27e08e..e48ef89 100644
