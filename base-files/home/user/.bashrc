@@ -22,7 +22,7 @@ HISTFILESIZE=-1
 shopt -s checkwinsize
 
 # PS1
-PS1='[\[\033[01;35m\]\u@\h\[\033[00m\] \[\033[01;36m\]\w\[\033[00m\]]\$ '
+#PS1='[\[\033[01;35m\]\u@\h\[\033[00m\] \[\033[01;36m\]\w\[\033[00m\]]\$ '
 
 # enable color support of ls and also add handy aliases
 if [ -x /usr/bin/dircolors ]; then
