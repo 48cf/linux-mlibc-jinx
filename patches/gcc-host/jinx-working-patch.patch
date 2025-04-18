@@ -50,10 +50,10 @@ index 65add8a..642a994 100644
      rust_add_target_info ("target_env", "uclibc");
    else
 diff --git gcc-host-clean/gcc/config/linux.h gcc-host-workdir/gcc/config/linux.h
-index a7248ac..e50ae14 100644
+index a7248ac..61aa353 100644
 --- gcc-host-clean/gcc/config/linux.h
 +++ gcc-host-workdir/gcc/config/linux.h
-@@ -34,18 +34,21 @@ see the files COPYING3 and COPYING.RUNTIME respectively.  If not, see
+@@ -34,23 +34,28 @@ see the files COPYING3 and COPYING.RUNTIME respectively.  If not, see
  #define OPTION_BIONIC_P(opts)	(DEFAULT_LIBC == LIBC_BIONIC)
  #undef OPTION_MUSL_P
  #define OPTION_MUSL_P(opts)	(DEFAULT_LIBC == LIBC_MUSL)
@@ -75,7 +75,14 @@ index a7248ac..e50ae14 100644
  
  #define GNU_USER_TARGET_OS_CPP_BUILTINS()			\
      do {							\
-@@ -63,21 +66,24 @@ see the files COPYING3 and COPYING.RUNTIME respectively.  If not, see
+ 	if (OPTION_GLIBC)					\
+ 	  builtin_define ("__gnu_linux__");			\
++	if (OPTION_MLIBC)					\
++	  builtin_define ("__mlibc_linux__");			\
+ 	builtin_define_std ("linux");				\
+ 	builtin_define_std ("unix");				\
+ 	builtin_assert ("system=linux");			\
+@@ -63,21 +68,24 @@ see the files COPYING3 and COPYING.RUNTIME respectively.  If not, see
     -muclibc or -mglibc or -mbionic or -mmusl has been passed to change
     the default.  */
  
@@ -110,7 +117,7 @@ index a7248ac..e50ae14 100644
  #else
  #error "Unsupported DEFAULT_LIBC"
  #endif /* DEFAULT_LIBC */
-@@ -99,19 +105,23 @@ see the files COPYING3 and COPYING.RUNTIME respectively.  If not, see
+@@ -99,19 +107,23 @@ see the files COPYING3 and COPYING.RUNTIME respectively.  If not, see
  #define MUSL_DYNAMIC_LINKER32 "/dev/null"
  #define MUSL_DYNAMIC_LINKER64 "/dev/null"
  #define MUSL_DYNAMIC_LINKERX32 "/dev/null"
