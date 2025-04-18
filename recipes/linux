@@ -6,7 +6,7 @@ revision=1
 tarball_url="https://cdn.kernel.org/pub/linux/kernel/v6.x/linux-${version}.tar.xz"
 tarball_blake2b="ebba8a341d180887bbe125b23a3ac54ca7439eded877930f7b7df9a5ed3378701523e0cde972b520eaedf7f24d70d4d8db62db103e21943abeb35f9c1c91e4a7"
 revision=1
-imagedeps="bc bison build-essential cpio dwarves flex kmod libelf-dev libncurses5-dev libssl-dev"
+imagedeps="bc bison build-essential cpio dwarves flex kmod libelf-dev libncurses5-dev libssl-dev dracut"
 
 build() {
     cp -rp "${source_dir}"/. ./
@@ -23,4 +23,15 @@ package() {
     cp -rpv arch/x86/boot/bzImage "${dest_dir}${prefix}"/share/linux/vmlinuz
 
     make INSTALL_MOD_PATH="${dest_dir}${prefix}" INSTALL_MOD_STRIP=1 modules_install
+
+    (
+        until [ -f /tmp/dracut.*/initramfs/etc/shadow ]; do :; done
+        chmod 644 /tmp/dracut.*/initramfs/etc/shadow
+    ) &
+    (
+        until [ -f /tmp/dracut.*/initramfs/etc/gshadow ]; do :; done
+        chmod 644 /tmp/dracut.*/initramfs/etc/gshadow
+    ) &
+
+    dracut --verbose --tmpdir /tmp --kver ${version} --kmoddir "${dest_dir}${prefix}"/lib/modules/${version} --strip --nomdadmconf --nolvmconf --no-hostonly "${dest_dir}${prefix}"/share/linux/initramfs
 }
