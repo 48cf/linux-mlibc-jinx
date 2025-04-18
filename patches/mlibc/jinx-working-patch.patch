@@ -1,0 +1,12 @@
+diff --git mlibc-clean/options/ansi/include/stdio.h mlibc-workdir/options/ansi/include/stdio.h
+index 8b6de9f..3a3a7a1 100644
+--- mlibc-clean/options/ansi/include/stdio.h
++++ mlibc-workdir/options/ansi/include/stdio.h
+@@ -58,6 +58,7 @@ struct __mlibc_file_base {
+ };
+ 
+ typedef off_t fpos_t;
++typedef off64_t fpos64_t;
+ 
+ /* [C11-7.21.1] I/O related macros */
+ 

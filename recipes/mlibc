@@ -1,0 +1,33 @@
+#! /bin/sh
+
+name=mlibc
+skip_pkg_check=yes
+version=121138e461d9e44407e634dc9721cde7c6ded39b
+revision=1
+git_url="https://github.com/managarm/mlibc.git"
+commit=${version}
+imagedeps="build-essential meson ninja-build"
+hostdeps="gcc pkg-config libgcc-binaries"
+builddeps="freestnd-c-hdrs freestnd-cxx-hdrs frigg"
+deps="mlibc-headers"
+
+configure() {
+        CFLAGS="$TARGET_CFLAGS" \
+        CXXFLAGS="$TARGET_CXXFLAGS" \
+        LDFLAGS="$TARGET_LDFLAGS -Wl,/usr/local/libgcc-binaries/libgcc-$ARCHITECTURE.a" \
+    meson_configure_noflags \
+        --buildtype=release \
+        -Dno_headers=true \
+        -Ddefault_library=both \
+        -Dlibgcc_dependency=false \
+        -Duse_freestnd_hdrs=enabled \
+        -Dlinux_kernel_headers=${sysroot_dir}/usr/include
+}
+
+build() {
+    ninja -j${parallelism}
+}
+
+package() {
+    DESTDIR="${dest_dir}" ninja install
+}

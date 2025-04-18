@@ -1,0 +1,395 @@
+diff --git binutils-clean/configure.ac binutils-workdir/configure.ac
+index 659388f..97b6eda 100644
+--- binutils-clean/configure.ac
++++ binutils-workdir/configure.ac
+@@ -114,11 +114,11 @@ extra_host_args=
+ ### or a host dependent tool.  Then put it into the appropriate list
+ ### (library or tools, host or target), doing a dependency sort.
+ 
+-# Subdirs will be configured in the order listed in build_configdirs, 
++# Subdirs will be configured in the order listed in build_configdirs,
+ # configdirs, or target_configdirs; see the serialization section below.
+ 
+-# Dependency sorting is only needed when *configuration* must be done in 
+-# a particular order.  In all cases a dependency should be specified in 
++# Dependency sorting is only needed when *configuration* must be done in
++# a particular order.  In all cases a dependency should be specified in
+ # the Makefile, whether or not it's implicitly specified here.
+ 
+ # Double entries in build_configdirs, configdirs, or target_configdirs may
+@@ -212,7 +212,7 @@ if test x"${host}" = x"${target}" ; then
+   is_cross_compiler=no
+ else
+   is_cross_compiler=yes
+-fi	
++fi
+ 
+ # Find the build and target subdir names.
+ GCC_TOPLEV_SUBDIRS
+@@ -259,7 +259,7 @@ fi
+ AC_ARG_WITH(zstd,
+ [AS_HELP_STRING([--with-zstd], [Support zstd compressed debug sections (default=auto)])])
+ 
+-# some tools are so dependent upon X11 that if we're not building with X, 
++# some tools are so dependent upon X11 that if we're not building with X,
+ # it's not even worth trying to configure, much less build, that tool.
+ 
+ case ${with_x} in
+@@ -267,7 +267,7 @@ case ${with_x} in
+   no)
+     skipdirs="${skipdirs} tk itcl libgui"
+     # We won't be able to build gdbtk without X.
+-    enable_gdbtk=no 
++    enable_gdbtk=no
+     ;;
+   *)  echo "*** bad value \"${with_x}\" for -with-x flag; ignored" 1>&2 ;;
+ esac
+@@ -351,7 +351,7 @@ case "${ENABLE_GOLD}" in
+       *-*-elf* | *-*-sysv4* | *-*-unixware* | *-*-eabi* | hppa*64*-*-hpux* \
+       | *-*-linux* | *-*-gnu* | frv-*-uclinux* | *-*-irix5* | *-*-irix6* \
+       | *-*-netbsd* | *-*-openbsd* | *-*-freebsd* | *-*-dragonfly* \
+-      | *-*-solaris2* | *-*-nto* | *-*-nacl* | *-*-haiku*)
++      | *-*-solaris2* | *-*-nto* | *-*-nacl* | *-*-haiku* | *-*-mlibc*)
+         case "${target}" in
+           *-*-linux*aout* | *-*-linux*oldld*)
+             ;;
+@@ -452,7 +452,7 @@ esac
+ # Only spaces may be used in this macro; not newlines or tabs.
+ unsupported_languages=
+ 
+-# Remove more programs from consideration, based on the host or 
++# Remove more programs from consideration, based on the host or
+ # target this usually means that a port of the program doesn't
+ # exist yet.
+ 
+@@ -981,7 +981,7 @@ case "${target}" in
+     ;;
+   *-*-lynxos*)
+     noconfigdirs="$noconfigdirs target-newlib target-libgloss"
+-    ;; 
++    ;;
+   *-*-mingw*)
+     noconfigdirs="$noconfigdirs target-newlib target-libgloss"
+     ;;
+@@ -1340,7 +1340,7 @@ case "${host}" in
+   hppa*-hp-hpux*)
+     host_makefile_frag="config/mh-pa"
+     ;;
+-  hppa*-*)	
++  hppa*-*)
+     host_makefile_frag="config/mh-pa"
+     ;;
+   i?86-*-darwin[[89]]* | i?86-*-darwin1[[0-7]]* | powerpc*-*-darwin*)
+@@ -2262,7 +2262,7 @@ if test -d ${srcdir}/gcc; then
+       # an apparent bug in bash 1.12 on linux.
+       ${srcdir}/gcc/[[*]]/config-lang.in) ;;
+       *)
+-        # From the config-lang.in, get $language, $target_libs, 
++        # From the config-lang.in, get $language, $target_libs,
+         # $lang_dirs, $boot_language, and $build_by_default
+         language=
+         target_libs=
+@@ -2566,7 +2566,7 @@ AC_ARG_WITH([target-bdw-gc-include],
+ AC_ARG_WITH([target-bdw-gc-lib],
+ [AS_HELP_STRING([--with-target-bdw-gc-lib=PATHLIST],
+ 		[specify directories for installed bdw-gc library])])
+-		  
++
+ case ,${enable_languages},:${enable_objc_gc} in *,objc,*:yes|*,objc,*:auto)
+   AC_MSG_CHECKING([for bdw garbage collector])
+   if test "x$with_target_bdw_gc$with_target_bdw_gc_include$with_target_bdw_gc_lib" = x; then
+@@ -2666,7 +2666,7 @@ done
+ build_configdirs_all="$build_configdirs"
+ build_configdirs=
+ for i in ${build_configdirs_all} ; do
+-  j=`echo $i | sed -e s/build-//g` 
++  j=`echo $i | sed -e s/build-//g`
+   if test -f ${srcdir}/$j/configure ; then
+     build_configdirs="${build_configdirs} $i"
+   fi
+@@ -2683,7 +2683,7 @@ done
+ target_configdirs_all="$target_configdirs"
+ target_configdirs=
+ for i in ${target_configdirs_all} ; do
+-  j=`echo $i | sed -e s/target-//g` 
++  j=`echo $i | sed -e s/target-//g`
+   if test -f ${srcdir}/$j/configure ; then
+     target_configdirs="${target_configdirs} $i"
+   fi
+@@ -2773,7 +2773,7 @@ ACX_TOOL_DIRS
+ 
+ copy_dirs=
+ 
+-AC_ARG_WITH([build-sysroot], 
++AC_ARG_WITH([build-sysroot],
+   [AS_HELP_STRING([--with-build-sysroot=SYSROOT],
+ 		  [use sysroot as the system root during the build])],
+   [if test x"$withval" != x ; then
+@@ -2872,11 +2872,11 @@ fi
+ # This is done by determining whether or not the appropriate directory
+ # is available, and by checking whether or not specific configurations
+ # have requested that this magic not happen.
+-# 
+-# The command line options always override the explicit settings in 
++#
++# The command line options always override the explicit settings in
+ # configure.ac, and the settings in configure.ac override this magic.
+ #
+-# If the default for a toolchain is to use GNU as and ld, and you don't 
++# If the default for a toolchain is to use GNU as and ld, and you don't
+ # want to do that, then you should use the --without-gnu-as and
+ # --without-gnu-ld options for the configure script.  Similarly, if
+ # the default is to use the included zlib and you don't want to do that,
+@@ -2986,7 +2986,7 @@ case "${target}" in
+     target_makefile_frag="config/mt-gnu"
+     ;;
+   *-*-aix4.[[3456789]]* | *-*-aix[[56789]].*)
+-    # nm and ar from AIX 4.3 and above require -X32_64 flag to all ar and nm 
++    # nm and ar from AIX 4.3 and above require -X32_64 flag to all ar and nm
+     # commands to handle both 32-bit and 64-bit objects.  These flags are
+     # harmless if we're using GNU nm or ar.
+     extra_arflags_for_target=" -X32_64"
+@@ -3056,7 +3056,7 @@ if test $? = 0 ; then
+   if test -s conftest || test -s conftest.exe ; then
+     we_are_ok=yes
+   fi
+-fi 
++fi
+ case $we_are_ok in
+   no)
+     echo 1>&2 "*** The command '${CC} -o conftest ${CFLAGS} ${CPPFLAGS} ${LDFLAGS} conftest.c' failed."
+@@ -3532,7 +3532,7 @@ bbaseargs=`echo "x$bbaseargs" | sed -e 's/^x *//' -e 's,\\$,$$,g'`
+ # --program-suffix have been applied to it.  Autoconf has already
+ # doubled dollar signs and backslashes in program_transform_name; we want
+ # the backslashes un-doubled, and then the entire thing wrapped in single
+-# quotes, because this will be expanded first by make and then by the shell. 
++# quotes, because this will be expanded first by make and then by the shell.
+ # Also, because we want to override the logic in subdir configure scripts to
+ # choose program_transform_name, replace any s,x,x, with s,y,y,.
+ sed -e "s,\\\\\\\\,\\\\,g; s,','\\\\'',g; s/s,x,x,/s,y,y,/" <<EOF_SED > conftestsed.out
+@@ -3611,7 +3611,7 @@ case "$target:$have_compiler:$host:$target:$enable_multilib" in
+       if test -s conftest || test -s conftest.exe ; then
+ 	dev64=yes
+       fi
+-    fi 
++    fi
+     rm -f conftest*
+     if test x${dev64} != xyes ; then
+       AC_MSG_ERROR([I suspect your system does not have 32-bit development libraries (libc and headers). If you have them, rerun configure with --enable-multilib. If you do not have them, and want to build a 64-bit-only compiler, rerun configure with --disable-multilib.])
+@@ -3924,7 +3924,7 @@ AC_SUBST(AR_PLUGIN_OPTION)
+ AC_SUBST(RANLIB_PLUGIN_OPTION)
+ 
+ # Target tools.
+-AC_ARG_WITH([build-time-tools], 
++AC_ARG_WITH([build-time-tools],
+   [AS_HELP_STRING([--with-build-time-tools=PATH],
+ 		  [use given path to find target tools during the build])],
+   [case x"$withval" in
+@@ -4038,7 +4038,7 @@ if test "$USE_MAINTAINER_MODE" = yes; then
+ else
+   MAINTAINER_MODE_TRUE='#'
+   MAINTAINER_MODE_FALSE=
+-fi	
++fi
+ MAINT=$MAINTAINER_MODE_TRUE
+ AC_SUBST(MAINT)dnl
+ 
+diff --git binutils-clean/gprofng/libcollector/collector.c binutils-workdir/gprofng/libcollector/collector.c
+index 8d978a6..004609b 100644
+--- binutils-clean/gprofng/libcollector/collector.c
++++ binutils-workdir/gprofng/libcollector/collector.c
+@@ -27,6 +27,7 @@
+ #include <sys/param.h>
+ #include <sys/utsname.h>	/* struct utsname	*/
+ #include <sys/resource.h>
++#include <sys/stat.h>
+ #include <sys/syscall.h>	/* system call fork() */
+ 
+ #include "gp-defs.h"
+diff --git binutils-clean/gprofng/libcollector/configure.ac binutils-workdir/gprofng/libcollector/configure.ac
+index 3205da3..daa8187 100644
+--- binutils-clean/gprofng/libcollector/configure.ac
++++ binutils-workdir/gprofng/libcollector/configure.ac
+@@ -18,7 +18,7 @@ dnl <http://www.gnu.org/licenses/>.
+ 
+ m4_include([../../bfd/version.m4])
+ AC_INIT([gprofng], [BFD_VERSION])
+-AC_CONFIG_MACRO_DIRS([../../config ../..])
++# AC_CONFIG_MACRO_DIRS([../../config ../..])
+ AC_CONFIG_AUX_DIR(../..)
+ AC_CANONICAL_TARGET
+ AM_INIT_AUTOMAKE
+diff --git binutils-clean/gprofng/libcollector/dispatcher.c binutils-workdir/gprofng/libcollector/dispatcher.c
+index adac1dd..9fae575 100644
+--- binutils-clean/gprofng/libcollector/dispatcher.c
++++ binutils-workdir/gprofng/libcollector/dispatcher.c
+@@ -598,7 +598,7 @@ collector_timer_create (timer_t * ptimerid)
+   sigev.sigev_signo = SIGPROF;
+   sigev.sigev_value.sival_ptr = ptimerid;
+ #if !defined(__MUSL_LIBC)
+-  sigev._sigev_un._tid = __collector_gettid ();
++  sigev.sigev_notify_thread_id = __collector_gettid ();
+ #endif
+   if (CALL_REAL (timer_create)(CLOCK_THREAD_CPUTIME_ID, &sigev, ptimerid) == -1)
+     {
+diff --git binutils-clean/gprofng/libcollector/mmaptrace.c binutils-workdir/gprofng/libcollector/mmaptrace.c
+index 486c87e..9b5809a 100644
+--- binutils-clean/gprofng/libcollector/mmaptrace.c
++++ binutils-workdir/gprofng/libcollector/mmaptrace.c
+@@ -32,6 +32,7 @@
+ #include <elf.h>
+ #include <sys/mman.h>
+ #include <sys/param.h>
++#include <sys/stat.h>
+ #include <stdint.h>
+ 
+ #include "gp-defs.h"
+@@ -470,90 +471,6 @@ dlopen_searchpath (void*(real_dlopen) (const char *, int),
+       TprintfT (0, "ERROR: dlopen(%s,NOLOAD): %s\n", dl_info.dli_fname, dlerror ());
+       return NULL;
+     }
+-#if !defined(__MUSL_LIBC)
+-  Dl_serinfo _info, *info = &_info;
+-  Dl_serpath *path;
+-
+-  /* determine search path count and required buffer size */
+-  dlinfo (caller_hndl, RTLD_DI_SERINFOSIZE, (void *) info);
+-
+-  /* allocate new buffer and initialize */
+-  /*
+-      CR# 7191331
+-      There is a bug in Linux that causes the first call
+-      to dlinfo() to return a small value for the dls_size.
+-
+-      The first call to dlinfo() determines the search path
+-      count and the required buffer size. The second call to
+-      dlinfo() tries to obtain the search path information.
+-
+-      However, the size of the buffer that is returned by
+-      the first call to the dlinfo() is incorrect (too small).
+-      The second call to dlinfo() uses the incorrect size to
+-      allocate memory on the stack and internally uses the memcpy()
+-      function to copy the search paths to the allocated memory space.
+-      The length of the search path is much larger than the buffer
+-      that is allocated on the stack. The memcpy() overwrites some
+-      of the information that are saved on the stack, specifically,
+-      it overwrites the "basename" parameter.
+-
+-      collect crashes right after the second call to dlinfo().
+-
+-      The search paths are used to locate the shared libraries.
+-      dlinfo() creates the search paths based on the paths
+-      that are assigned to LD_LIBRARY_PATH environment variable
+-      and the standard library paths. The standard library paths
+-      consists of the /lib and the /usr/lib paths. The
+-      standard library paths are always included to the search
+-      paths by dlinfo() even if the LD_LIBRARY_PATH environment
+-      variable is not defined. Therefore, at the very least the
+-      dls_cnt is assigned to 2 (/lib and /usr/lib) and dlinfo()
+-      will never assign dls_cnt to zero. The dls_cnt is the count
+-      of the potential paths for searching the shared libraries.
+-
+-      So we need to increase the buffer size before the second
+-      call to dlinfo(). There are number of ways to increase
+-      the buffer size. However, none of them can calculate the
+-      buffer size precisely. Some users on the web have suggested
+-      to multiply the MAXPATHLEN by dls_cnt for the buffer size.
+-      The MAXPATHLEN is assigned to 1024 bytes. In my opinion
+-      this is too much. So I have decided to multiply dls_size
+-      by dls_cnt for the buffer size since the dls_size is much
+-      smaller than 1024 bytes.
+-
+-      I have already confirmed with our user that the workaround
+-      is working with his real application. Additionally,
+-      the dlopen_searchpath() function is called only by the
+-      libcollector init() function when the experiment is started.
+-      Therefore, allocating some extra bytes on the stack which
+-      is local to this routine is harmless.
+-   */
+-
+-  info = alloca (_info.dls_size * _info.dls_cnt);
+-  info->dls_size = _info.dls_size;
+-  info->dls_cnt = _info.dls_cnt;
+-
+-  /* obtain search path information */
+-  dlinfo (caller_hndl, RTLD_DI_SERINFO, (void *) info);
+-  path = &info->dls_serpath[0];
+-
+-  char pathname[MAXPATHLEN];
+-  for (unsigned int cnt = 1; cnt <= info->dls_cnt; cnt++, path++)
+-    {
+-      __collector_strlcpy (pathname, path->dls_name, sizeof (pathname));
+-      __collector_strlcat (pathname, "/", sizeof (pathname));
+-      __collector_strlcat (pathname, basename, sizeof (pathname));
+-      void* ret = NULL;
+-#if (ARCH(Intel) && WSIZE(32)) || ARCH(SPARC)
+-      ret = (real_dlopen) (pathname, mode);
+-#else
+-      ret = CALL_REAL (dlopen)(pathname, mode);
+-#endif
+-      TprintfT (DBG_LT2, "try %d/%d: %s = %p\n", cnt, info->dls_cnt, pathname, ret);
+-      if (ret)
+-	return ret; // success!
+-    }
+-#endif
+   return NULL;
+ }
+ 
+@@ -1447,7 +1364,7 @@ init_mmap_intf ()
+     __real_dlopen = __real_dlopen_2_0;
+   else
+     __real_dlopen = dlsym (dlflag, "dlopen");
+-    
++
+   __real_dlclose_2_34 = dlvsym (dlflag, "dlclose", "GLIBC_2.34");
+   __real_dlclose_2_17 = dlvsym (dlflag, "dlclose", "GLIBC_2.17");
+   __real_dlclose_2_2_5 = dlvsym (dlflag, "dlclose", "GLIBC_2.2.5");
+diff --git binutils-clean/libiberty/configure.ac binutils-workdir/libiberty/configure.ac
+index c27e08e..f73cd6b 100644
+--- binutils-clean/libiberty/configure.ac
++++ binutils-workdir/libiberty/configure.ac
+@@ -37,7 +37,7 @@ else
+   libiberty_topdir="${srcdir}/.."
+ fi
+ AC_SUBST(libiberty_topdir)
+-AC_CONFIG_AUX_DIR($libiberty_topdir)
++AC_CONFIG_AUX_DIR([.])
+ 
+ dnl Very limited version of automake's enable-maintainer-mode
+ 
+@@ -159,10 +159,10 @@ case x"$enable_install_libiberty" in
+   xyes|x)
+     target_header_dir=libiberty
+     ;;
+-  xno)   
++  xno)
+     target_header_dir=
+     ;;
+-  *) 
++  *)
+     # This could be sanity-checked in various ways...
+     target_header_dir="${enable_install_libiberty}"
+     ;;
+@@ -659,19 +659,19 @@ if test -z "${setobjs}"; then
+     ;;
+ 
+   *-*-uwin*)
+-    # Under some versions of uwin, vfork is notoriously buggy and the test 
++    # Under some versions of uwin, vfork is notoriously buggy and the test
+     # can hang configure; on other versions, vfork exists just as a stub.
+     # FIXME: This should be removed once vfork in uwin's runtime is fixed.
+     ac_cv_func_vfork_works=no
+     # Under uwin 2.0+, sys_nerr and sys_errlist exist, but they are
+-    # macros (actually, these are imported from a DLL, but the end effect 
++    # macros (actually, these are imported from a DLL, but the end effect
+     # is the same), so the test below won't find them.
+     libiberty_cv_var_sys_nerr=yes
+     libiberty_cv_var_sys_errlist=yes
+     ;;
+ 
+   *-*-*vms*)
+-    # Under VMS, vfork works very different than on Unix. The standard test 
++    # Under VMS, vfork works very different than on Unix. The standard test
+     # won't work, and it isn't easily adaptable. It makes more sense to
+     # just force it.
+     ac_cv_func_vfork_works=yes

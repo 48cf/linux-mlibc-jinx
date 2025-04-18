@@ -1,0 +1,386 @@
+diff --git gcc-host-clean/fixincludes/mkfixinc.sh gcc-host-workdir/fixincludes/mkfixinc.sh
+index df90720..c7df202 100755
+--- gcc-host-clean/fixincludes/mkfixinc.sh
++++ gcc-host-workdir/fixincludes/mkfixinc.sh
+@@ -12,6 +12,7 @@ target=fixinc.sh
+ # Check for special fix rules for particular targets
+ case $machine in
+     i?86-*-cygwin* | \
++    *-*-*-mlibc | \
+     i?86-*-mingw32* | \
+     x86_64-*-mingw32* | \
+     powerpc-*-eabisim* | \
+diff --git gcc-host-clean/gcc/config/i386/t-linux64 gcc-host-workdir/gcc/config/i386/t-linux64
+index f9edc28..7a7bb2f 100644
+--- gcc-host-clean/gcc/config/i386/t-linux64
++++ gcc-host-workdir/gcc/config/i386/t-linux64
+@@ -33,6 +33,6 @@
+ comma=,
+ MULTILIB_OPTIONS    = $(subst $(comma),/,$(TM_MULTILIB_CONFIG))
+ MULTILIB_DIRNAMES   = $(patsubst m%, %, $(subst /, ,$(MULTILIB_OPTIONS)))
+-MULTILIB_OSDIRNAMES = m64=../lib64$(call if_multiarch,:x86_64-linux-gnu)
+-MULTILIB_OSDIRNAMES+= m32=$(if $(wildcard $(shell echo $(SYSTEM_HEADER_DIR))/../../usr/lib32),../lib32,../lib)$(call if_multiarch,:i386-linux-gnu)
++MULTILIB_OSDIRNAMES = m64=../lib$(call if_multiarch,:x86_64-linux-gnu)
++MULTILIB_OSDIRNAMES+= m32=$(if $(wildcard $(shell echo $(SYSTEM_HEADER_DIR))/../../usr/lib32),../lib32)$(call if_multiarch,:i386-linux-gnu)
+ MULTILIB_OSDIRNAMES+= mx32=../libx32$(call if_multiarch,:x86_64-linux-gnux32)
+diff --git gcc-host-clean/gcc/config/linux-d.cc gcc-host-workdir/gcc/config/linux-d.cc
+index 9604041..c07c214 100644
+--- gcc-host-clean/gcc/config/linux-d.cc
++++ gcc-host-workdir/gcc/config/linux-d.cc
+@@ -44,6 +44,8 @@ linux_d_os_builtins (void)
+     d_add_builtin_version ("CRuntime_Bionic");
+   else if (OPTION_MUSL)
+     d_add_builtin_version ("CRuntime_Musl");
++  else if (OPTION_MLIBC)
++    d_add_builtin_version ("CRuntime_Mlibc");
+ }
+ 
+ /* Handle a call to `__traits(getTargetInfo, "objectFormat")'.  */
+diff --git gcc-host-clean/gcc/config/linux-rust.cc gcc-host-workdir/gcc/config/linux-rust.cc
+index 65add8a..642a994 100644
+--- gcc-host-clean/gcc/config/linux-rust.cc
++++ gcc-host-workdir/gcc/config/linux-rust.cc
+@@ -45,6 +45,8 @@ linux_rust_target_os_info (void)
+     rust_add_target_info ("target_env", "gnu");
+   else if (OPTION_MUSL)
+     rust_add_target_info ("target_env", "musl");
++  else if (OPTION_MLIBC)
++    rust_add_target_info ("target_env", "mlibc");
+   else if (OPTION_UCLIBC)
+     rust_add_target_info ("target_env", "uclibc");
+   else
+diff --git gcc-host-clean/gcc/config/linux.h gcc-host-workdir/gcc/config/linux.h
+index a7248ac..e50ae14 100644
+--- gcc-host-clean/gcc/config/linux.h
++++ gcc-host-workdir/gcc/config/linux.h
+@@ -34,18 +34,21 @@ see the files COPYING3 and COPYING.RUNTIME respectively.  If not, see
+ #define OPTION_BIONIC_P(opts)	(DEFAULT_LIBC == LIBC_BIONIC)
+ #undef OPTION_MUSL_P
+ #define OPTION_MUSL_P(opts)	(DEFAULT_LIBC == LIBC_MUSL)
++#define OPTION_MLIBC_P(opts)	(DEFAULT_LIBC == LIBC_MLIBC)
+ #else
+ #define OPTION_GLIBC_P(opts)	((opts)->x_linux_libc == LIBC_GLIBC)
+ #define OPTION_UCLIBC_P(opts)	((opts)->x_linux_libc == LIBC_UCLIBC)
+ #define OPTION_BIONIC_P(opts)	((opts)->x_linux_libc == LIBC_BIONIC)
+ #undef OPTION_MUSL_P
+ #define OPTION_MUSL_P(opts)	((opts)->x_linux_libc == LIBC_MUSL)
++#define OPTION_MLIBC_P(opts)	((opts)->x_linux_libc == LIBC_MLIBC)
+ #endif
+ #define OPTION_GLIBC		OPTION_GLIBC_P (&global_options)
+ #define OPTION_UCLIBC		OPTION_UCLIBC_P (&global_options)
+ #define OPTION_BIONIC		OPTION_BIONIC_P (&global_options)
+ #undef OPTION_MUSL
+ #define OPTION_MUSL		OPTION_MUSL_P (&global_options)
++#define OPTION_MLIBC		OPTION_MLIBC_P (&global_options)
+ 
+ #define GNU_USER_TARGET_OS_CPP_BUILTINS()			\
+     do {							\
+@@ -63,21 +66,24 @@ see the files COPYING3 and COPYING.RUNTIME respectively.  If not, see
+    -muclibc or -mglibc or -mbionic or -mmusl has been passed to change
+    the default.  */
+ 
+-#define CHOOSE_DYNAMIC_LINKER1(LIBC1, LIBC2, LIBC3, LIBC4, LD1, LD2, LD3, LD4)	\
+-  "%{" LIBC2 ":" LD2 ";:%{" LIBC3 ":" LD3 ";:%{" LIBC4 ":" LD4 ";:" LD1 "}}}"
++#define CHOOSE_DYNAMIC_LINKER1(LIBC1, LIBC2, LIBC3, LIBC4, LIBC5, LD1, LD2, LD3, LD4, LD5)	\
++  "%{" LIBC2 ":" LD2 ";:%{" LIBC3 ":" LD3 ";:%{" LIBC4 ":" LD4 ";:%{" LIBC5 ":" LD5 ";:" LD1 "}}}}"
+ 
+ #if DEFAULT_LIBC == LIBC_GLIBC
+-#define CHOOSE_DYNAMIC_LINKER(G, U, B, M) \
+-  CHOOSE_DYNAMIC_LINKER1 ("mglibc", "muclibc", "mbionic", "mmusl", G, U, B, M)
++#define CHOOSE_DYNAMIC_LINKER(G, U, B, MU, ML) \
++  CHOOSE_DYNAMIC_LINKER1 ("mglibc", "muclibc", "mbionic", "mmusl", "mmlibc", G, U, B, MU, ML)
+ #elif DEFAULT_LIBC == LIBC_UCLIBC
+-#define CHOOSE_DYNAMIC_LINKER(G, U, B, M) \
+-  CHOOSE_DYNAMIC_LINKER1 ("muclibc", "mglibc", "mbionic", "mmusl", U, G, B, M)
++#define CHOOSE_DYNAMIC_LINKER(G, U, B, MU, ML) \
++  CHOOSE_DYNAMIC_LINKER1 ("muclibc", "mglibc", "mbionic", "mmusl", "mmlibc", U, G, B, MU, ML)
+ #elif DEFAULT_LIBC == LIBC_BIONIC
+-#define CHOOSE_DYNAMIC_LINKER(G, U, B, M) \
+-  CHOOSE_DYNAMIC_LINKER1 ("mbionic", "mglibc", "muclibc", "mmusl", B, G, U, M)
++#define CHOOSE_DYNAMIC_LINKER(G, U, B, MU, ML) \
++  CHOOSE_DYNAMIC_LINKER1 ("mbionic", "mglibc", "muclibc", "mmusl", "mmlibc", B, G, U, MU, ML)
+ #elif DEFAULT_LIBC == LIBC_MUSL
+-#define CHOOSE_DYNAMIC_LINKER(G, U, B, M) \
+-  CHOOSE_DYNAMIC_LINKER1 ("mmusl", "mglibc", "muclibc", "mbionic", M, G, U, B)
++#define CHOOSE_DYNAMIC_LINKER(G, U, B, MU, ML) \
++  CHOOSE_DYNAMIC_LINKER1 ("mmusl", "mglibc", "muclibc", "mbionic", "mmlibc", MU, G, U, B, ML)
++#elif DEFAULT_LIBC == LIBC_MLIBC
++#define CHOOSE_DYNAMIC_LINKER(G, U, B, MU, ML) \
++  CHOOSE_DYNAMIC_LINKER1 ("mmlibc", "mglibc", "muclibc", "mbionic", "mmusl", ML, G, U, B, MU)
+ #else
+ #error "Unsupported DEFAULT_LIBC"
+ #endif /* DEFAULT_LIBC */
+@@ -99,19 +105,23 @@ see the files COPYING3 and COPYING.RUNTIME respectively.  If not, see
+ #define MUSL_DYNAMIC_LINKER32 "/dev/null"
+ #define MUSL_DYNAMIC_LINKER64 "/dev/null"
+ #define MUSL_DYNAMIC_LINKERX32 "/dev/null"
++#define MLIBC_DYNAMIC_LINKER "/lib/ld.so"
++#define MLIBC_DYNAMIC_LINKER32 "/dev/null"
++#define MLIBC_DYNAMIC_LINKER64 "/lib/ld.so"
++#define MLIBC_DYNAMIC_LINKERX32 "/dev/null"
+ 
+ #define GNU_USER_DYNAMIC_LINKER						\
+   CHOOSE_DYNAMIC_LINKER (GLIBC_DYNAMIC_LINKER, UCLIBC_DYNAMIC_LINKER,	\
+-			 BIONIC_DYNAMIC_LINKER, MUSL_DYNAMIC_LINKER)
++			 BIONIC_DYNAMIC_LINKER, MUSL_DYNAMIC_LINKER, MLIBC_DYNAMIC_LINKER)
+ #define GNU_USER_DYNAMIC_LINKER32					\
+   CHOOSE_DYNAMIC_LINKER (GLIBC_DYNAMIC_LINKER32, UCLIBC_DYNAMIC_LINKER32, \
+-			 BIONIC_DYNAMIC_LINKER32, MUSL_DYNAMIC_LINKER32)
++			 BIONIC_DYNAMIC_LINKER32, MUSL_DYNAMIC_LINKER32, MLIBC_DYNAMIC_LINKER32)
+ #define GNU_USER_DYNAMIC_LINKER64					\
+   CHOOSE_DYNAMIC_LINKER (GLIBC_DYNAMIC_LINKER64, UCLIBC_DYNAMIC_LINKER64, \
+-			 BIONIC_DYNAMIC_LINKER64, MUSL_DYNAMIC_LINKER64)
++			 BIONIC_DYNAMIC_LINKER64, MUSL_DYNAMIC_LINKER64, MLIBC_DYNAMIC_LINKER64)
+ #define GNU_USER_DYNAMIC_LINKERX32					\
+   CHOOSE_DYNAMIC_LINKER (GLIBC_DYNAMIC_LINKERX32, UCLIBC_DYNAMIC_LINKERX32, \
+-			 BIONIC_DYNAMIC_LINKERX32, MUSL_DYNAMIC_LINKERX32)
++			 BIONIC_DYNAMIC_LINKERX32, MUSL_DYNAMIC_LINKERX32, MLIBC_DYNAMIC_LINKERX32)
+ 
+ /* Whether we have Bionic libc runtime */
+ #undef TARGET_HAS_BIONIC
+diff --git gcc-host-clean/gcc/config.gcc gcc-host-workdir/gcc/config.gcc
+index 95c91ee..d4c5a5f 100644
+--- gcc-host-clean/gcc/config.gcc
++++ gcc-host-workdir/gcc/config.gcc
+@@ -187,7 +187,7 @@
+ #			the --with-sysroot configure option or the
+ #			--sysroot command line option is used this
+ #			will be relative to the sysroot.
+-# target_type_format_char 
++# target_type_format_char
+ # 			The default character to be used for formatting
+ #			the attribute in a
+ #			.type symbol_name, ${t_t_f_c}<property>
+@@ -693,7 +693,7 @@ case ${target} in
+ esac
+ 
+ # Common C libraries.
+-tm_defines="$tm_defines LIBC_GLIBC=1 LIBC_UCLIBC=2 LIBC_BIONIC=3 LIBC_MUSL=4"
++tm_defines="$tm_defines LIBC_GLIBC=1 LIBC_UCLIBC=2 LIBC_BIONIC=3 LIBC_MUSL=4 LIBC_MLIBC=5"
+ 
+ # 32-bit x86 processors supported by --with-arch=.  Each processor
+ # MUST be separated by exactly one space.
+@@ -919,6 +919,9 @@ case ${target} in
+     *-*-*musl*)
+       tm_defines="$tm_defines DEFAULT_LIBC=LIBC_MUSL"
+       ;;
++    *-*-*mlibc*)
++      tm_defines="$tm_defines DEFAULT_LIBC=LIBC_MLIBC"
++      ;;
+     *)
+       tm_defines="$tm_defines DEFAULT_LIBC=LIBC_GLIBC"
+       ;;
+diff --git gcc-host-clean/libcpp/Makefile.in gcc-host-workdir/libcpp/Makefile.in
+index ebbca37..ea97ba4 100644
+--- gcc-host-clean/libcpp/Makefile.in
++++ gcc-host-workdir/libcpp/Makefile.in
+@@ -32,10 +32,10 @@ AUTOCONF = @AUTOCONF@
+ AUTOHEADER = @AUTOHEADER@
+ CATALOGS = $(patsubst %,po/%,@CATALOGS@)
+ CC = @CC@
+-CFLAGS = @CFLAGS@
++override CFLAGS := @CFLAGS@
+ WARN_CFLAGS = @warn@ @c_warn@ @WARN_PEDANTIC@ @WERROR@
+ CXX = @CXX@
+-CXXFLAGS = @CXXFLAGS@
++override CXXFLAGS := @CXXFLAGS@
+ WARN_CXXFLAGS = @warn@ @WARN_PEDANTIC@ @WERROR@
+ CPP = @CPP@
+ CPPFLAGS = @CPPFLAGS@
+@@ -45,7 +45,7 @@ INCINTL = @INCINTL@
+ INSTALL_DATA = @INSTALL_DATA@
+ INSTALL_PROGRAM = @INSTALL_PROGRAM@
+ INSTALL_SCRIPT = @INSTALL_SCRIPT@
+-LDFLAGS = @LDFLAGS@
++override LDFLAGS := @LDFLAGS@
+ LIBICONV = @LIBICONV@
+ LIBINTL = @LIBINTL@
+ PACKAGE = @PACKAGE@
+diff --git gcc-host-clean/libgcc/config.host gcc-host-workdir/libgcc/config.host
+index e75a7af..ef85694 100644
+--- gcc-host-clean/libgcc/config.host
++++ gcc-host-workdir/libgcc/config.host
+@@ -103,7 +103,7 @@ arm*-*-*)
+ 	;;
+ avr-*-*)
+ 	cpu_type=avr
+-	;;    
++	;;
+ bfin*-*)
+ 	cpu_type=bfin
+ 	;;
+@@ -304,6 +304,11 @@ case ${host} in
+   tmake_file="$tmake_file t-crtstuff-pic t-libgcc-pic t-eh-dw2-dip t-slibgcc t-slibgcc-fuchsia"
+   extra_parts="crtbegin.o crtend.o"
+   ;;
++*-*-*-mlibc)
++  extra_parts="$extra_parts crtbegin.o crtbeginS.o crtend.o crtendS.o"
++  tmake_file="$tmake_file t-crtstuff-pic"
++  tmake_file="$tmake_file t-slibgcc t-slibgcc-gld t-slibgcc-elf-ver t-libgcc-pic"
++  ;;
+ *-*-linux* | frv-*-*linux* | *-*-kfreebsd*-gnu | *-*-gnu* | *-*-kopensolaris*-gnu | *-*-uclinuxfdpiceabi)
+   tmake_file="$tmake_file t-crtstuff-pic t-libgcc-pic t-eh-dw2-dip t-slibgcc t-slibgcc-gld t-slibgcc-elf-ver t-linux"
+   extra_parts="crtbegin.o crtbeginS.o crtbeginT.o crtend.o crtendS.o"
+@@ -752,6 +757,10 @@ x86_64-*-elf* | x86_64-*-rtems*)
+ x86_64-*-fuchsia*)
+ 	tmake_file="$tmake_file t-libgcc-pic"
+ 	;;
++x86_64-*-*-mlibc)
++	extra_parts="$extra_parts crtprec32.o crtprec64.o crtprec80.o crtfastmath.o"
++	tmake_file="$tmake_file i386/t-crtpc t-crtfm i386/t-crtstuff t-dfprules"
++	;;
+ i[34567]86-*-dragonfly*)
+ 	tmake_file="${tmake_file} i386/t-dragonfly i386/t-crtstuff"
+ 	md_unwind_header=i386/dragonfly-unwind.h
+diff --git gcc-host-clean/libgcc/configure.ac gcc-host-workdir/libgcc/configure.ac
+index 4e8c036..a0bc7de 100644
+--- gcc-host-clean/libgcc/configure.ac
++++ gcc-host-workdir/libgcc/configure.ac
+@@ -46,7 +46,7 @@ else
+   libgcc_topdir="${srcdir}/.."
+ fi
+ AC_SUBST(libgcc_topdir)
+-AC_CONFIG_AUX_DIR($libgcc_topdir)
++AC_CONFIG_AUX_DIR([.])
+ AC_CONFIG_HEADER(auto-target.h:config.in)
+ 
+ AC_ARG_ENABLE(shared,
+@@ -307,7 +307,7 @@ AC_LIB_PROG_LD_GNU
+ 
+ AC_MSG_CHECKING([for thread model used by GCC])
+ target_thread_file=`$CC -v 2>&1 | sed -n 's/^Thread model: //p'`
+-AC_MSG_RESULT([$target_thread_file]) 
++AC_MSG_RESULT([$target_thread_file])
+ 
+ # Check for assembler CFI support.
+ AC_CACHE_CHECK([whether assembler supports CFI directives], [libgcc_cv_cfi],
+diff --git gcc-host-clean/libiberty/configure.ac gcc-host-workdir/libiberty/configure.ac
+index 0888e63..3c59ac7 100644
+--- gcc-host-clean/libiberty/configure.ac
++++ gcc-host-workdir/libiberty/configure.ac
+@@ -37,7 +37,7 @@ else
+   libiberty_topdir="${srcdir}/.."
+ fi
+ AC_SUBST(libiberty_topdir)
+-AC_CONFIG_AUX_DIR($libiberty_topdir)
++AC_CONFIG_AUX_DIR([.])
+ 
+ dnl Very limited version of automake's enable-maintainer-mode
+ 
+@@ -159,10 +159,10 @@ case x"$enable_install_libiberty" in
+   xyes|x)
+     target_header_dir=libiberty
+     ;;
+-  xno)   
++  xno)
+     target_header_dir=
+     ;;
+-  *) 
++  *)
+     # This could be sanity-checked in various ways...
+     target_header_dir="${enable_install_libiberty}"
+     ;;
+@@ -659,19 +659,19 @@ if test -z "${setobjs}"; then
+     ;;
+ 
+   *-*-uwin*)
+-    # Under some versions of uwin, vfork is notoriously buggy and the test 
++    # Under some versions of uwin, vfork is notoriously buggy and the test
+     # can hang configure; on other versions, vfork exists just as a stub.
+     # FIXME: This should be removed once vfork in uwin's runtime is fixed.
+     ac_cv_func_vfork_works=no
+     # Under uwin 2.0+, sys_nerr and sys_errlist exist, but they are
+-    # macros (actually, these are imported from a DLL, but the end effect 
++    # macros (actually, these are imported from a DLL, but the end effect
+     # is the same), so the test below won't find them.
+     libiberty_cv_var_sys_nerr=yes
+     libiberty_cv_var_sys_errlist=yes
+     ;;
+ 
+   *-*-*vms*)
+-    # Under VMS, vfork works very different than on Unix. The standard test 
++    # Under VMS, vfork works very different than on Unix. The standard test
+     # won't work, and it isn't easily adaptable. It makes more sense to
+     # just force it.
+     ac_cv_func_vfork_works=yes
+diff --git gcc-host-clean/libstdc++-v3/configure.host gcc-host-workdir/libstdc++-v3/configure.host
+index 7bc4307..ce3cd5d 100644
+--- gcc-host-clean/libstdc++-v3/configure.host
++++ gcc-host-workdir/libstdc++-v3/configure.host
+@@ -136,7 +136,7 @@ esac
+ 
+ # Now look for the file(s) usually tied to a CPU model, and make
+ # default choices for those if they haven't been explicitly set
+-# already.  
++# already.
+ cpu_include_dir=cpu/${try_cpu}
+ 
+ 
+@@ -152,7 +152,7 @@ case "${host_cpu}" in
+ esac
+ 
+ 
+-# Set specific CPU overrides for atomic_word_dir and atomic_flags. 
++# Set specific CPU overrides for atomic_word_dir and atomic_flags.
+ # Most can just use generic.
+ # THIS TABLE IS SORTED.  KEEP IT THAT WAY.
+ case "${host_cpu}" in
+@@ -255,7 +255,7 @@ case "${host_os}" in
+   freebsd*)
+     os_include_dir="os/bsd/freebsd"
+     ;;
+-  linux-musl*)
++  linux-musl* | linux-mlibc*)
+     os_include_dir="os/generic"
+     ;;
+   gnu* | linux* | kfreebsd*-gnu | uclinux*)
+diff --git gcc-host-clean/libstdc++-v3/crossconfig.m4 gcc-host-workdir/libstdc++-v3/crossconfig.m4
+index b3269cb..6dae703 100644
+--- gcc-host-clean/libstdc++-v3/crossconfig.m4
++++ gcc-host-workdir/libstdc++-v3/crossconfig.m4
+@@ -90,7 +90,7 @@ case "${host}" in
+ 
+   *-freebsd*)
+     SECTION_FLAGS='-ffunction-sections -fdata-sections'
+-    AC_SUBST(SECTION_FLAGS) 
++    AC_SUBST(SECTION_FLAGS)
+     GLIBCXX_CHECK_LINKER_FEATURES
+     AC_DEFINE(HAVE_SETENV)
+     AC_DEFINE(HAVE_FINITEF)
+@@ -136,6 +136,18 @@ case "${host}" in
+     AC_CHECK_FUNCS(uselocale)
+     ;;
+ 
++  *-mlibc*)
++    GLIBCXX_CHECK_COMPILER_FEATURES
++    GLIBCXX_CHECK_LINKER_FEATURES
++    GLIBCXX_CHECK_MATH_SUPPORT
++    GLIBCXX_CHECK_STDLIB_SUPPORT
++    AC_DEFINE(_GLIBCXX_USE_DEV_RANDOM)
++    AC_DEFINE(_GLIBCXX_USE_RANDOM_TR1)
++    GCC_CHECK_TLS
++    AC_CHECK_FUNCS(aligned_alloc posix_memalign memalign _aligned_malloc)
++    AC_CHECK_FUNCS(timespec_get)
++    ;;
++
+   *-fuchsia*)
+     SECTION_FLAGS='-ffunction-sections -fdata-sections'
+     AC_SUBST(SECTION_FLAGS)
+@@ -200,7 +212,7 @@ case "${host}" in
+     ;;
+   *-netbsd* | *-openbsd*)
+     SECTION_FLAGS='-ffunction-sections -fdata-sections'
+-    AC_SUBST(SECTION_FLAGS) 
++    AC_SUBST(SECTION_FLAGS)
+     GLIBCXX_CHECK_LINKER_FEATURES
+     AC_DEFINE(HAVE_FINITEF)
+     AC_DEFINE(HAVE_FINITE)
+@@ -221,7 +233,7 @@ case "${host}" in
+     ;;
+   *-qnx6.1* | *-qnx6.2*)
+     SECTION_FLAGS='-ffunction-sections -fdata-sections'
+-    AC_SUBST(SECTION_FLAGS) 
++    AC_SUBST(SECTION_FLAGS)
+     GLIBCXX_CHECK_LINKER_FEATURES
+     AC_DEFINE(HAVE_COSF)
+     AC_DEFINE(HAVE_COSL)
