@@ -1,0 +1,48 @@
+diff --git openssl-clean/crypto/conf/conf_def.c openssl-workdir/crypto/conf/conf_def.c
+index 31c02cc..4e4ca4e 100644
+--- openssl-clean/crypto/conf/conf_def.c
++++ openssl-workdir/crypto/conf/conf_def.c
+@@ -11,6 +11,7 @@
+ 
+ #include <stdio.h>
+ #include <string.h>
++#include <strings.h>
+ #include "internal/cryptlib.h"
+ #include "internal/o_dir.h"
+ #include <openssl/lhash.h>
+diff --git openssl-clean/test/bntest.c openssl-workdir/test/bntest.c
+index 9273e86..c4a1683 100644
+--- openssl-clean/test/bntest.c
++++ openssl-workdir/test/bntest.c
+@@ -10,6 +10,7 @@
+ #include <errno.h>
+ #include <stdio.h>
+ #include <string.h>
++#include <strings.h>
+ #include <ctype.h>
+ 
+ #include <openssl/bn.h>
+diff --git openssl-clean/test/ssl_test_ctx.c openssl-workdir/test/ssl_test_ctx.c
+index 6cdced5..d98baec 100644
+--- openssl-clean/test/ssl_test_ctx.c
++++ openssl-workdir/test/ssl_test_ctx.c
+@@ -8,6 +8,7 @@
+  */
+ 
+ #include <string.h>
++#include <strings.h>
+ 
+ #include <openssl/e_os2.h>
+ #include <openssl/crypto.h>
+diff --git openssl-clean/test/v3nametest.c openssl-workdir/test/v3nametest.c
+index 566472a..b9ddeec 100644
+--- openssl-clean/test/v3nametest.c
++++ openssl-workdir/test/v3nametest.c
+@@ -8,6 +8,7 @@
+  */
+ 
+ #include <string.h>
++#include <strings.h>
+ 
+ #include <openssl/e_os2.h>
+ #include <openssl/x509.h>
