@@ -11,6 +11,8 @@ imagedeps="bc bison build-essential cpio dwarves flex kmod libelf-dev libncurses
 build() {
     cp -rp "${source_dir}"/. ./
 
+    cp "${base_dir}/build-support/linux-config" ./.config
+
     make olddefconfig
     make -j${parallelism}
 }
