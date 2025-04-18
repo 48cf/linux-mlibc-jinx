@@ -33,11 +33,10 @@ $SUDO parted -s jinix.img mklabel gpt
 $SUDO parted -s jinix.img mkpart ESP fat32 2048s 5%
 $SUDO parted -s jinix.img mkpart jinix_root ext4 5% 100%
 $SUDO parted -s jinix.img set 1 esp on
-$SUDO sgdisk jinix.img -u 2:0e0e97f9-5c96-4826-972f-118e2316e55c
 
 LOOPBACK_DEV=$($SUDO losetup -Pf --show jinix.img)
 $SUDO mkfs.fat ${LOOPBACK_DEV}p1
-$SUDO mkfs.ext4 ${LOOPBACK_DEV}p2
+$SUDO mkfs.ext4 -U 0e0e97f9-5c96-4826-972f-118e2316e55c ${LOOPBACK_DEV}p2
 mkdir -p mount_dir
 $SUDO mount ${LOOPBACK_DEV}p2 mount_dir
 
