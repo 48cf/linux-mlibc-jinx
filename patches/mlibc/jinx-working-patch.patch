@@ -1,3 +1,23 @@
+diff --git mlibc-clean/abis/linux/ipc.h mlibc-workdir/abis/linux/ipc.h
+index b5f9f11..46abff4 100644
+--- mlibc-clean/abis/linux/ipc.h
++++ mlibc-workdir/abis/linux/ipc.h
+@@ -31,13 +31,13 @@ extern "C" {
+ typedef int key_t;
+ 
+ struct ipc64_perm {
+-	key_t __ipc_perm_key;
++	key_t key;
+ 	uid_t uid;
+ 	gid_t gid;
+ 	uid_t cuid;
+ 	gid_t cgid;
+ 	mode_t mode;
+-	int __ipc_perm_seq;
++	int __seq;
+ 	long __unused[2];
+ };
+ 
 diff --git mlibc-clean/options/ansi/generic/stdio.cpp mlibc-workdir/options/ansi/generic/stdio.cpp
 index 2dd7cfb..aef2f9d 100644
 --- mlibc-clean/options/ansi/generic/stdio.cpp
@@ -53,6 +73,48 @@ index ea00f73..0375b82 100644
  }
  
  void endspent(void) {
+diff --git mlibc-clean/options/linux/include/bits/linux/cpu_set.h mlibc-workdir/options/linux/include/bits/linux/cpu_set.h
+index 0eff228..39b7e2e 100644
+--- mlibc-clean/options/linux/include/bits/linux/cpu_set.h
++++ mlibc-workdir/options/linux/include/bits/linux/cpu_set.h
+@@ -40,6 +40,24 @@ int __mlibc_cpu_count(const size_t __setsize, const cpu_set_t *__set);
+ #define CPU_COUNT_S(setsize, set) __mlibc_cpu_count((setsize), (set))
+ #define CPU_COUNT(set) CPU_COUNT_S(sizeof(cpu_set_t), set)
+ 
++#define __CPU_op_func_S(func, op) \
++static __inline void __CPU_##func##_S(size_t __size, cpu_set_t *__dest, \
++	const cpu_set_t *__src1, const cpu_set_t *__src2) \
++{ \
++	size_t __i; \
++	for (__i=0; __i<__size/sizeof(long); __i++) \
++		((unsigned long *)__dest)[__i] = ((unsigned long *)__src1)[__i] \
++			op ((unsigned long *)__src2)[__i] ; \
++}
++
++__CPU_op_func_S(AND, &)
++__CPU_op_func_S(OR, |)
++__CPU_op_func_S(XOR, ^)
++
++#define CPU_AND_S(a,b,c,d) __CPU_AND_S(a,b,c,d)
++#define CPU_OR_S(a,b,c,d) __CPU_OR_S(a,b,c,d)
++#define CPU_XOR_S(a,b,c,d) __CPU_XOR_S(a,b,c,d)
++
+ #endif /* !__MLIBC_ABI_ONLY */
+ 
+ #ifdef __cplusplus
+diff --git mlibc-clean/options/posix/generic/mqueue.cpp mlibc-workdir/options/posix/generic/mqueue.cpp
+index d635419..3719028 100644
+--- mlibc-clean/options/posix/generic/mqueue.cpp
++++ mlibc-workdir/options/posix/generic/mqueue.cpp
+@@ -20,3 +20,8 @@ mqd_t mq_open(const char *, int, ...) {
+ 	__ensure(!"Not implemented");
+ 	__builtin_unreachable();
+ }
++
++int mq_close(mqd_t) {
++	__ensure(!"Not implemented");
++	__builtin_unreachable();
++}
 diff --git mlibc-clean/options/posix/generic/posix_locale.cpp mlibc-workdir/options/posix/generic/posix_locale.cpp
 index bd8710a..f189c1c 100644
 --- mlibc-clean/options/posix/generic/posix_locale.cpp
@@ -127,3 +189,144 @@ index bd8710a..f189c1c 100644
  }
  
  locale_t duplocale(locale_t) {
+diff --git mlibc-clean/options/posix/generic/sys-uio.cpp mlibc-workdir/options/posix/generic/sys-uio.cpp
+index 0f14bc0..607b224 100644
+--- mlibc-clean/options/posix/generic/sys-uio.cpp
++++ mlibc-workdir/options/posix/generic/sys-uio.cpp
+@@ -65,3 +65,13 @@ ssize_t pwritev(int, const struct iovec *, int, off_t) {
+ 	__ensure(!"Not implemented");
+ 	__builtin_unreachable();
+ }
++
++ssize_t process_vm_readv(pid_t, const struct iovec *, unsigned long, const struct iovec *, unsigned long, unsigned long) {
++	__ensure(!"Not implemented");
++	__builtin_unreachable();
++}
++
++ssize_t process_vm_writev(pid_t, const struct iovec *, unsigned long, const struct iovec *, unsigned long, unsigned long) {
++	__ensure(!"Not implemented");
++	__builtin_unreachable();
++}
+diff --git mlibc-clean/options/posix/generic/termios.cpp mlibc-workdir/options/posix/generic/termios.cpp
+index 631456a..09c26b9 100644
+--- mlibc-clean/options/posix/generic/termios.cpp
++++ mlibc-workdir/options/posix/generic/termios.cpp
+@@ -101,3 +101,7 @@ int tcsetattr(int fd, int opts, const struct termios *attr) {
+ 	return 0;
+ }
+ 
++int cfsetspeed(struct termios *, speed_t) {
++	__ensure(!"Not implemented");
++	__builtin_unreachable();
++}
+diff --git mlibc-clean/options/posix/include/mqueue.h mlibc-workdir/options/posix/include/mqueue.h
+index cbee138..485607f 100644
+--- mlibc-clean/options/posix/include/mqueue.h
++++ mlibc-workdir/options/posix/include/mqueue.h
+@@ -15,6 +15,7 @@ int mq_getattr(mqd_t __mqdes, struct mq_attr *__attr);
+ int mq_setattr(mqd_t __mqdes, const struct mq_attr *__restrict__ __newattr, struct mq_attr *__restrict__ __oldattr);
+ int mq_unlink(const char *__name);
+ mqd_t mq_open(const char *__name, int __flags, ...);
++int mq_close(mqd_t __mqdes);
+ 
+ #endif /* !__MLIBC_ABI_ONLY */
+ 
+diff --git mlibc-clean/options/posix/include/sys/msg.h mlibc-workdir/options/posix/include/sys/msg.h
+index f62220a..be4afe2 100644
+--- mlibc-clean/options/posix/include/sys/msg.h
++++ mlibc-workdir/options/posix/include/sys/msg.h
+@@ -9,6 +9,17 @@
+ extern "C" {
+ #endif
+ 
++struct msginfo {
++	int msgpool;
++	int msgmap;
++	int msgmax;
++	int msgmnb;
++	int msgmni;
++	int msgssz;
++	int msgtql;
++	unsigned short int msgseg;
++};
++
+ #ifndef __MLIBC_ABI_ONLY
+ 
+ int msgget(key_t __key, int __msgflg);
+diff --git mlibc-clean/options/posix/include/sys/sem.h mlibc-workdir/options/posix/include/sys/sem.h
+index d98f91f..07aebd1 100644
+--- mlibc-clean/options/posix/include/sys/sem.h
++++ mlibc-workdir/options/posix/include/sys/sem.h
+@@ -12,9 +12,15 @@ extern "C" {
+ #define GETPID 11
+ #define GETVAL 12
+ #define GETALL 13
++#define GETNCNT 14
++#define GETZCNT 15
+ #define SETVAL 16
+ #define SETALL 17
+ 
++#define SEM_STAT 18
++#define SEM_INFO 19
++#define SEM_STAT_ANY 20
++
+ #define SEM_UNDO 0x1000
+ 
+ struct sembuf {
+@@ -31,6 +37,19 @@ struct semid_ds {
+ 	unsigned long   sem_nsems;
+ };
+ 
++struct seminfo {
++	int semmap;
++	int semmni;
++	int semmns;
++	int semmnu;
++	int semmsl;
++	int semopm;
++	int semume;
++	int semusz;
++	int semvmx;
++	int semaem;
++};
++
+ #ifndef __MLIBC_ABI_ONLY
+ 
+ int semget(key_t __key, int __nsems, int __semflg);
+diff --git mlibc-clean/options/posix/include/sys/uio.h mlibc-workdir/options/posix/include/sys/uio.h
+index 1547036..a6184dd 100644
+--- mlibc-clean/options/posix/include/sys/uio.h
++++ mlibc-workdir/options/posix/include/sys/uio.h
+@@ -1,6 +1,7 @@
+ #ifndef _SYS_UIO_H
+ #define _SYS_UIO_H
+ 
++#include <abi-bits/pid_t.h>
+ #include <bits/posix/iovec.h>
+ #include <bits/ssize_t.h>
+ #include <bits/off_t.h>
+@@ -22,6 +23,12 @@ ssize_t writev(int __fd, const struct iovec *__iov, int __iovcnt);
+ ssize_t preadv(int __fd, const struct iovec *__iov, int __iovcnt, off_t __offset);
+ ssize_t pwritev(int __fd, const struct iovec *__iov, int __iovcnt, off_t __offset);
+ 
++// Linux extensions
++ssize_t process_vm_readv(pid_t __pid, const struct iovec *__local_iov, unsigned long __liovcnt, const struct iovec *__remote_iov,
++	unsigned long __riovcnt, unsigned long __flags);
++ssize_t process_vm_writev(pid_t __pid, const struct iovec *__local_iov, unsigned long __liovcnt, const struct iovec *__remote_iov,
++	unsigned long __riovcnt, unsigned long __flags);
++
+ #endif /* !__MLIBC_ABI_ONLY */
+ 
+ #ifdef __cplusplus
+diff --git mlibc-clean/options/posix/include/termios.h mlibc-workdir/options/posix/include/termios.h
+index cf2025b..3f2f295 100644
+--- mlibc-clean/options/posix/include/termios.h
++++ mlibc-workdir/options/posix/include/termios.h
+@@ -87,6 +87,7 @@ int tcgetattr(int fd, struct termios *__attr);
+ pid_t tcgetsid(int __fd);
+ int tcsendbreak(int __fd, int __duration);
+ int tcsetattr(int __fd, int __optional_actions, const struct termios *__attr);
++int cfsetspeed(struct termios *__tios, speed_t __speed);
+ 
+ #endif /* !__MLIBC_ABI_ONLY */
+ 
