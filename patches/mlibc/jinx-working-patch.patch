@@ -10,3 +10,29 @@ index 8b6de9f..3a3a7a1 100644
  
  /* [C11-7.21.1] I/O related macros */
  
+diff --git mlibc-clean/options/glibc/generic/shadow.cpp mlibc-workdir/options/glibc/generic/shadow.cpp
+index ea00f73..0375b82 100644
+--- mlibc-clean/options/glibc/generic/shadow.cpp
++++ mlibc-workdir/options/glibc/generic/shadow.cpp
+@@ -207,9 +207,18 @@ struct spwd *getspnam(const char *name) {
+ 	return res;
+ }
+ 
+-struct spwd *fgetspent(FILE *) {
+-	__ensure(!"Not implemented");
+-	__builtin_unreachable();
++struct spwd *fgetspent(FILE *f) {
++	static struct spwd sp;
++	static char *line;
++	struct spwd *res = 0;
++	size_t size = 0;
++	int cs;
++	pthread_setcancelstate(PTHREAD_CANCEL_DISABLE, &cs);
++	if(getline(&line, &size, f) >= 0 && __parsespent(line, &sp) >= 0) {
++		res = &sp;
++	}
++	pthread_setcancelstate(cs, 0);
++	return res;
+ }
+ 
+ void endspent(void) {
