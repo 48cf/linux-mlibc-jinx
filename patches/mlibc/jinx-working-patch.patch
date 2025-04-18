@@ -36,3 +36,77 @@ index ea00f73..0375b82 100644
  }
  
  void endspent(void) {
+diff --git mlibc-clean/options/posix/generic/posix_locale.cpp mlibc-workdir/options/posix/generic/posix_locale.cpp
+index bd8710a..f189c1c 100644
+--- mlibc-clean/options/posix/generic/posix_locale.cpp
++++ mlibc-workdir/options/posix/generic/posix_locale.cpp
+@@ -1,34 +1,55 @@
++#include <errno.h>
++#include <locale.h>
++
+ #include <bits/posix/posix_locale.h>
+ #include <bits/ensure.h>
+ #include <mlibc/debug.hpp>
+ 
+ namespace {
+ 
+-bool newlocale_seen = false;
+-bool uselocale_seen = false;
++struct LocaleObject {
++	/* ... */
++};
++
++LocaleObject cLocaleObject = {};
+ 
+ }
+ 
+-locale_t newlocale(int, const char *, locale_t) {
+-	// Due to all of the locale functions being stubs, the locale will not be used
+-	if(!newlocale_seen) {
+-		mlibc::infoLogger() << "mlibc: newlocale() is a no-op" << frg::endlog;
+-		newlocale_seen = true;
++locale_t newlocale(int, const char *locale, locale_t) {
++	if(!locale) {
++		errno = EINVAL;
++		return nullptr;
+ 	}
+-	return nullptr;
++
++	if(strcmp(locale, "C") != 0 && strcmp(locale, "POSIX") != 0) {
++		mlibc::infoLogger() << "mlibc: newlocale() only supports \"C\" and \"POSIX\" locales" << frg::endlog;
++		errno = ENOENT;
++		return nullptr;
++	}
++
++	mlibc::infoLogger() << "mlibc: newlocale() is a stub" << frg::endlog;
++	return (locale_t)&cLocaleObject;
+ }
+ 
+ void freelocale(locale_t) {
+ 	mlibc::infoLogger() << "mlibc: freelocale() is a no-op" << frg::endlog;
+-	return;
+ }
+ 
+-locale_t uselocale(locale_t) {
+-	if(!uselocale_seen) {
+-		mlibc::infoLogger() << "mlibc: uselocale() is a no-op" << frg::endlog;
+-		uselocale_seen = true;
++locale_t uselocale(locale_t locale) {
++	if(!locale) {
++		errno = EINVAL;
++		return nullptr;
+ 	}
+-	return nullptr;
++
++	if(locale == LC_GLOBAL_LOCALE) {
++		locale = &cLocaleObject;
++	} else if(locale != &cLocaleObject) {
++		errno = EINVAL;
++		return nullptr;
++	}
++
++	mlibc::infoLogger() << "mlibc: uselocale() is a stub" << frg::endlog;
++	return &cLocaleObject;
+ }
+ 
+ locale_t duplocale(locale_t) {
