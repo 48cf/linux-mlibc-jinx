@@ -1,7 +1,8 @@
-.jinx-cache
-builds
-host-builds
-host-pkgs
-pkgs
-sources
-sysroot
+*.img
+/.jinx-cache
+/builds
+/host-builds
+/host-pkgs
+/pkgs
+/sources
+/sysroot
