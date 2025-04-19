@@ -37,7 +37,8 @@ build() {
         -Dnss-mymachines=false \
         -Dnss-resolve=false \
         -Dnss-systemd=false \
-        -Dbpf-framework=false
+        -Dbpf-framework=false \
+        -Dutmp=false
 
     ninja -j${parallelism}
 }
