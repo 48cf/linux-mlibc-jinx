@@ -49,6 +49,9 @@ package() {
     mkdir -pv ${dest_dir}/etc/pam.d/
 	cp -v "${base_dir}"/build-support/systemd/* "${dest_dir}"/etc/pam.d/
 
+    mkdir -pv ${dest_dir}/etc/systemd/system/getty.target.wants
+    ln -sv "${prefix}"/lib/systemd/system/getty@.service "${dest_dir}"/etc/systemd/system/getty.target.wants/getty@tty1.service
+
     mv -v ${dest_dir}/usr/sbin/* ${dest_dir}/usr/bin
     rm -rvf ${dest_dir}/usr/sbin
 
