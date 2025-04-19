@@ -8,4 +8,5 @@ source_dir="base-files"
 
 package() {
     cp -rpv ${source_dir}/. "${dest_dir}"/
+    install -dv -m 1777 "${dest_dir}"/tmp "${dest_dir}"/var/tmp
 }
