@@ -11,6 +11,19 @@ index b597265..316aaf8 100644
                                           + bias
  #endif
                                  );
+diff --git systemd-clean/src/basic/raw-clone.h systemd-workdir/src/basic/raw-clone.h
+index 6de67ab..e7ee14e 100644
+--- systemd-clean/src/basic/raw-clone.h
++++ systemd-workdir/src/basic/raw-clone.h
+@@ -74,6 +74,8 @@ static inline pid_t raw_clone(unsigned long flags) {
+                 } else
+                         ret = in_child ? 0 : child_pid;
+         }
++#elif defined(__mlibc_linux__)
++        ret = fork();
+ #else
+         ret = (pid_t) syscall(__NR_clone, flags, NULL);
+ #endif
 diff --git systemd-clean/src/core/exec-invoke.c systemd-workdir/src/core/exec-invoke.c
 index 56df5cf..5dee569 100644
 --- systemd-clean/src/core/exec-invoke.c
@@ -75,6 +88,28 @@ index 21c12d5..fbcd3f7 100644
  
  #include "sd-messages.h"
  
+diff --git systemd-clean/src/shared/async.c systemd-workdir/src/shared/async.c
+index bd043c8..8fad777 100644
+--- systemd-clean/src/shared/async.c
++++ systemd-workdir/src/shared/async.c
+@@ -86,6 +86,9 @@ static int close_func(void *p) {
+ }
+ 
+ int asynchronous_close(int fd) {
++#if defined(__mlibc_linux__)
++        safe_close(fd);
++#else
+         unsigned v;
+         pid_t pid;
+         int r;
+@@ -129,6 +132,7 @@ int asynchronous_close(int fd) {
+                         if (waitpid(pid, NULL, __WCLONE) >= 0 || errno != EINTR)
+                                 break;
+         }
++#endif
+ 
+         return -EBADF; /* return an invalidated fd */
+ }
 diff --git systemd-clean/src/shared/bus-util.c systemd-workdir/src/shared/bus-util.c
 index f347ea6..51394fb 100644
 --- systemd-clean/src/shared/bus-util.c
