@@ -101,6 +101,28 @@ index 4517700..560aa67 100644
  
  #ifdef __cplusplus
  }
+diff --git mlibc-clean/options/linux/generic/sched.cpp mlibc-workdir/options/linux/generic/sched.cpp
+index 9407e9c..10e159e 100644
+--- mlibc-clean/options/linux/generic/sched.cpp
++++ mlibc-workdir/options/linux/generic/sched.cpp
+@@ -24,9 +24,14 @@ int setns(int fd, int nstype) {
+ 	return 0;
+ }
+ 
+-int sched_getscheduler(pid_t) {
+-	__ensure(!"Not implemented");
+-	__builtin_unreachable();
++int sched_getscheduler(pid_t pid) {
++	MLIBC_CHECK_OR_ENOSYS(mlibc::sys_getscheduler, -1);
++	int policy;
++	if(int e = mlibc::sys_getscheduler(pid, &policy); e) {
++		errno = e;
++		return -1;
++	}
++	return policy;
+ }
+ 
+ int sched_getaffinity(pid_t pid, size_t cpusetsize, cpu_set_t *mask) {
 diff --git mlibc-clean/options/linux/include/bits/linux/cpu_set.h mlibc-workdir/options/linux/include/bits/linux/cpu_set.h
 index 0eff228..39b7e2e 100644
 --- mlibc-clean/options/linux/include/bits/linux/cpu_set.h
@@ -247,6 +269,18 @@ index 631456a..09c26b9 100644
 +	__ensure(!"Not implemented");
 +	__builtin_unreachable();
 +}
+diff --git mlibc-clean/options/posix/include/mlibc/posix-sysdeps.hpp mlibc-workdir/options/posix/include/mlibc/posix-sysdeps.hpp
+index b23436b..87e1c7d 100644
+--- mlibc-clean/options/posix/include/mlibc/posix-sysdeps.hpp
++++ mlibc-workdir/options/posix/include/mlibc/posix-sysdeps.hpp
+@@ -232,6 +232,7 @@ int sys_vm_unmap(void *pointer, size_t size);
+ [[gnu::weak]] int sys_semget(key_t key, int n, int fl, int *id);
+ [[gnu::weak]] int sys_semctl(int semid, int semnum, int cmd, void *semun, int *ret);
+ 
++[[gnu::weak]] int sys_getscheduler(pid_t pid, int *ret);
+ [[gnu::weak]] int sys_getaffinity(pid_t pid, size_t cpusetsize, cpu_set_t *mask);
+ [[gnu::weak]] int sys_getthreadaffinity(pid_t tid, size_t cpusetsize, cpu_set_t *mask);
+ 
 diff --git mlibc-clean/options/posix/include/mqueue.h mlibc-workdir/options/posix/include/mqueue.h
 index cbee138..485607f 100644
 --- mlibc-clean/options/posix/include/mqueue.h
@@ -359,10 +393,25 @@ index cf2025b..3f2f295 100644
  #endif /* !__MLIBC_ABI_ONLY */
  
 diff --git mlibc-clean/sysdeps/linux/generic/sysdeps.cpp mlibc-workdir/sysdeps/linux/generic/sysdeps.cpp
-index a24da3c..4d1d384 100644
+index a24da3c..9c8b07f 100644
 --- mlibc-clean/sysdeps/linux/generic/sysdeps.cpp
 +++ mlibc-workdir/sysdeps/linux/generic/sysdeps.cpp
-@@ -1872,6 +1872,14 @@ int sys_readlink(const char *path, void *buf, size_t bufsiz, ssize_t *len) {
+@@ -1012,6 +1012,14 @@ int sys_swapoff(const char *path) {
+ 	return 0;
+ }
+ 
++int sys_getscheduler(pid_t pid, int *ret) {
++	auto ret_val = do_syscall(SYS_sched_getscheduler, pid);
++	if (int e = sc_error(ret_val); e)
++		return e;
++	*ret = sc_int_result<int>(ret_val);
++	return 0;
++}
++
+ int sys_getaffinity(pid_t pid, size_t cpusetsize, cpu_set_t *mask) {
+ 	auto ret = do_syscall(SYS_sched_getaffinity, pid, cpusetsize, mask);
+ 	if (int e = sc_error(ret); e)
+@@ -1872,6 +1880,14 @@ int sys_readlink(const char *path, void *buf, size_t bufsiz, ssize_t *len) {
  	return 0;
  }
  
