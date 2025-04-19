@@ -18,6 +18,28 @@ index b5f9f11..46abff4 100644
  	long __unused[2];
  };
  
+diff --git mlibc-clean/options/ansi/generic/stdio.cpp mlibc-workdir/options/ansi/generic/stdio.cpp
+index a5e177a..46719bb 100644
+--- mlibc-clean/options/ansi/generic/stdio.cpp
++++ mlibc-workdir/options/ansi/generic/stdio.cpp
+@@ -393,7 +393,8 @@ static int do_scanf(H &handler, const char *fmt, __builtin_va_list args) {
+ 			} else {
+ 				char *typed_dest = (char *)dest;
+ 				if(typed_dest)
+-					typed_dest[count++] = c;
++					typed_dest[count] = c;
++				count++;
+ 			}
+ 		};
+ 
+@@ -648,7 +649,6 @@ static int do_scanf(H &handler, const char *fmt, __builtin_va_list args) {
+ 					handler.consume();
+ 					append_to_buffer(c);
+ 					c = handler.look_ahead();
+-					count++;
+ 				}
+ 				break;
+ 			}
 diff --git mlibc-clean/options/ansi/include/stdio.h mlibc-workdir/options/ansi/include/stdio.h
 index 8b6de9f..3a3a7a1 100644
 --- mlibc-clean/options/ansi/include/stdio.h
