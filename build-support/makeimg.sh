@@ -4,22 +4,21 @@ set -ex
 
 : "${SUDO:=sudo}"
 
+set -f
 $SUDO rm -rf sysroot
 
-set -f
-./jinx install "sysroot" base $PKGS_TO_INSTALL
-set +f
+# Retry the installation in case of transient errors like 503 TooManyRequests.
+until ./jinx build-if-needed base $PKGS_TO_INSTALL; do
+    echo "Package installation failed (likely due to rate limiting). Retrying in 30 seconds..."
+    sleep 30
+done
 
+$SUDO ./jinx install "sysroot" base $PKGS_TO_INSTALL
+
+set +f
 if ! [ -d host-pkgs/limine ]; then
     ./jinx host-build limine
 fi
-
-$SUDO chown -R root:root sysroot/*
-$SUDO chown -R 1000:1000 sysroot/home/user
-$SUDO chmod 750 sysroot/root
-$SUDO chmod 777 sysroot/tmp
-$SUDO chmod 777 sysroot/run
-$SUDO chmod 710 sysroot/home/user
 
 rm -rf mount_dir
 

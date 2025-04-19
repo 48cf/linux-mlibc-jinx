@@ -145,6 +145,19 @@ index a7248ac..61aa353 100644
  
  /* Whether we have Bionic libc runtime */
  #undef TARGET_HAS_BIONIC
+diff --git gcc-host-clean/gcc/config.build gcc-host-workdir/gcc/config.build
+index b748b33..afbdde0 100644
+--- gcc-host-clean/gcc/config.build
++++ gcc-host-workdir/gcc/config.build
+@@ -45,7 +45,7 @@
+ build_xm_file=
+ build_xm_defines=
+ build_exeext=
+-build_install_headers_dir=install-headers-tar
++build_install_headers_dir=install-headers-cp
+ build_file_translate=
+ 
+ # System-specific settings.
 diff --git gcc-host-clean/gcc/config.gcc gcc-host-workdir/gcc/config.gcc
 index 95c91ee..df68126 100644
 --- gcc-host-clean/gcc/config.gcc
