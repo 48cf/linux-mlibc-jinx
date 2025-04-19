@@ -1,0 +1,125 @@
+diff --git systemd-clean/src/basic/build-path.c systemd-workdir/src/basic/build-path.c
+index b597265..316aaf8 100644
+--- systemd-clean/src/basic/build-path.c
++++ systemd-workdir/src/basic/build-path.c
+@@ -37,7 +37,7 @@ static int get_runpath_from_dynamic(const ElfW(Dyn) *d, ElfW(Addr) bias, const c
+                          * using the bias calculated earlier. */
+                         if (d->d_un.d_val != 0)
+                                 strtab = (const char *) ((uintptr_t) d->d_un.d_val
+-#if defined(__mips__) || defined(__riscv)
++#if defined(__mips__) || defined(__riscv) || defined(__mlibc_linux__)
+                                          + bias
+ #endif
+                                 );
+diff --git systemd-clean/src/core/exec-invoke.c systemd-workdir/src/core/exec-invoke.c
+index 56df5cf..5dee569 100644
+--- systemd-clean/src/core/exec-invoke.c
++++ systemd-workdir/src/core/exec-invoke.c
+@@ -5,6 +5,7 @@
+ #include <sys/ioctl.h>
+ #include <sys/mount.h>
+ #include <sys/prctl.h>
++#include <sys/file.h>
+ 
+ #if HAVE_PAM
+ #include <security/pam_appl.h>
+diff --git systemd-clean/src/libsystemd/sd-event/sd-event.c systemd-workdir/src/libsystemd/sd-event/sd-event.c
+index 64825ca..42c3efb 100644
+--- systemd-clean/src/libsystemd/sd-event/sd-event.c
++++ systemd-workdir/src/libsystemd/sd-event/sd-event.c
+@@ -1891,7 +1891,8 @@ _public_ int sd_event_trim_memory(void) {
+ 
+         usec_t before_timestamp = now(CLOCK_MONOTONIC);
+         hashmap_trim_pools();
+-        r = malloc_trim(0);
++        // r = malloc_trim(0);
++        r = 0;
+         usec_t after_timestamp = now(CLOCK_MONOTONIC);
+ 
+         if (r > 0)
+diff --git systemd-clean/src/mountfsd/mountwork.c systemd-workdir/src/mountfsd/mountwork.c
+index 1d218a6..dbb884f 100644
+--- systemd-clean/src/mountfsd/mountwork.c
++++ systemd-workdir/src/mountfsd/mountwork.c
+@@ -23,6 +23,8 @@
+ #include "varlink.h"
+ #include "varlink-io.systemd.MountFileSystem.h"
+ 
++#include <sys/file.h>
++
+ #define ITERATIONS_MAX 64U
+ #define RUNTIME_MAX_USEC (5 * USEC_PER_MINUTE)
+ #define PRESSURE_SLEEP_TIME_USEC (50 * USEC_PER_MSEC)
+diff --git systemd-clean/src/nsresourced/userns-registry.c systemd-workdir/src/nsresourced/userns-registry.c
+index 2cc1b1f..7a9c200 100644
+--- systemd-clean/src/nsresourced/userns-registry.c
++++ systemd-workdir/src/nsresourced/userns-registry.c
+@@ -13,6 +13,8 @@
+ #include "user-util.h"
+ #include "userns-registry.h"
+ 
++#include <sys/file.h>
++
+ int userns_registry_open_fd(void) {
+         int fd;
+ 
+diff --git systemd-clean/src/portable/portable.c systemd-workdir/src/portable/portable.c
+index 21c12d5..fbcd3f7 100644
+--- systemd-clean/src/portable/portable.c
++++ systemd-workdir/src/portable/portable.c
+@@ -1,6 +1,7 @@
+ /* SPDX-License-Identifier: LGPL-2.1-or-later */
+ 
+ #include <linux/loop.h>
++#include <sys/file.h>
+ 
+ #include "sd-messages.h"
+ 
+diff --git systemd-clean/src/shared/bus-util.c systemd-workdir/src/shared/bus-util.c
+index f347ea6..51394fb 100644
+--- systemd-clean/src/shared/bus-util.c
++++ systemd-workdir/src/shared/bus-util.c
+@@ -764,9 +764,9 @@ static int method_dump_memory_state_by_fd(sd_bus_message *message, void *userdat
+         if (!f)
+                 return -ENOMEM;
+ 
+-        r = RET_NERRNO(malloc_info(/* options= */ 0, f));
+-        if (r < 0)
+-                return r;
++        // r = RET_NERRNO(malloc_info(/* options= */ 0, f));
++        // if (r < 0)
++        //         return r;
+ 
+         r = memstream_finalize(&m, &dump, &dump_size);
+         if (r < 0)
+diff --git systemd-clean/src/shared/common-signal.c systemd-workdir/src/shared/common-signal.c
+index 8e70e36..40a4410 100644
+--- systemd-clean/src/shared/common-signal.c
++++ systemd-workdir/src/shared/common-signal.c
+@@ -66,10 +66,10 @@ int sigrtmin18_handler(sd_event_source *s, const struct signalfd_siginfo *si, vo
+                         break;
+                 }
+ 
+-                if (malloc_info(0, f) < 0) {
+-                        log_error_errno(errno, "Failed to invoke malloc_info(): %m");
+-                        break;
+-                }
++                // if (malloc_info(0, f) < 0) {
++                //         log_error_errno(errno, "Failed to invoke malloc_info(): %m");
++                //         break;
++                // }
+ 
+                 (void) memstream_dump(LOG_INFO, &m);
+                 break;
+diff --git systemd-clean/src/shared/dev-setup.c systemd-workdir/src/shared/dev-setup.c
+index 4b4b625..07fa519 100644
+--- systemd-clean/src/shared/dev-setup.c
++++ systemd-workdir/src/shared/dev-setup.c
+@@ -3,6 +3,7 @@
+ #include <errno.h>
+ #include <stdlib.h>
+ #include <unistd.h>
++#include <sys/file.h>
+ 
+ #include "alloc-util.h"
+ #include "dev-setup.h"
