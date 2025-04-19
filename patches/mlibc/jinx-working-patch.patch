@@ -30,6 +30,29 @@ index 8b6de9f..3a3a7a1 100644
  
  /* [C11-7.21.1] I/O related macros */
  
+diff --git mlibc-clean/options/glibc/generic/gshadow.cpp mlibc-workdir/options/glibc/generic/gshadow.cpp
+index f93a47d..9c724b0 100644
+--- mlibc-clean/options/glibc/generic/gshadow.cpp
++++ mlibc-workdir/options/glibc/generic/gshadow.cpp
+@@ -5,3 +5,18 @@ int getsgnam_r(const char *, struct sgrp *, char *, size_t, struct sgrp **) {
+ 	__ensure(!"Not implemented");
+ 	__builtin_unreachable();
+ }
++
++int putsgent(const struct sgrp *, FILE *) {
++	__ensure(!"Not implemented");
++	__builtin_unreachable();
++}
++
++struct sgrp *fgetsgent(FILE *) {
++	__ensure(!"Not implemented");
++	__builtin_unreachable();
++}
++
++void endsgent(void) {
++	__ensure(!"Not implemented");
++	__builtin_unreachable();
++}
 diff --git mlibc-clean/options/glibc/generic/shadow.cpp mlibc-workdir/options/glibc/generic/shadow.cpp
 index ea00f73..0375b82 100644
 --- mlibc-clean/options/glibc/generic/shadow.cpp
@@ -56,6 +79,28 @@ index ea00f73..0375b82 100644
  }
  
  void endspent(void) {
+diff --git mlibc-clean/options/glibc/include/gshadow.h mlibc-workdir/options/glibc/include/gshadow.h
+index 4517700..560aa67 100644
+--- mlibc-clean/options/glibc/include/gshadow.h
++++ mlibc-workdir/options/glibc/include/gshadow.h
+@@ -1,6 +1,7 @@
+ #ifndef _GSHADOW_H
+ #define _GSHADOW_H
+ 
++#include <stdio.h>
+ #include <paths.h>
+ #include <bits/size_t.h>
+ 
+@@ -20,6 +21,9 @@ extern "C" {
+ #endif
+ 
+ int getsgnam_r(const char *__name, struct sgrp *__result_buf, char *__buffer, size_t __len, struct sgrp **__result);
++int putsgent(const struct sgrp *__g, FILE *__stream);
++struct sgrp *fgetsgent(FILE *__stream);
++void endsgent(void);
+ 
+ #ifdef __cplusplus
+ }
 diff --git mlibc-clean/options/linux/include/bits/linux/cpu_set.h mlibc-workdir/options/linux/include/bits/linux/cpu_set.h
 index 0eff228..39b7e2e 100644
 --- mlibc-clean/options/linux/include/bits/linux/cpu_set.h
@@ -313,3 +358,22 @@ index cf2025b..3f2f295 100644
  
  #endif /* !__MLIBC_ABI_ONLY */
  
+diff --git mlibc-clean/sysdeps/linux/generic/sysdeps.cpp mlibc-workdir/sysdeps/linux/generic/sysdeps.cpp
+index a24da3c..4d1d384 100644
+--- mlibc-clean/sysdeps/linux/generic/sysdeps.cpp
++++ mlibc-workdir/sysdeps/linux/generic/sysdeps.cpp
+@@ -1872,6 +1872,14 @@ int sys_readlink(const char *path, void *buf, size_t bufsiz, ssize_t *len) {
+ 	return 0;
+ }
+ 
++int sys_readlinkat(int dirfd, const char *path, void *buffer, size_t max_size, ssize_t *length) {
++	auto ret = do_syscall(SYS_readlinkat, dirfd, path, buffer, max_size);
++	if (int e = sc_error(ret); e)
++		return e;
++	*length = sc_int_result<ssize_t>(ret);
++	return 0;
++}
++
+ #if __MLIBC_BSD_OPTION
+ // getloadavg() adapted from musl
+ int sys_getloadavg(double *samples) {
